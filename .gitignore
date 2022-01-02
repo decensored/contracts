@@ -1,0 +1,7 @@
+private_key
+package-lock.json
+node_modules/
+contracts/artifacts
+cache/
+artifacts/
+.DS_Store
