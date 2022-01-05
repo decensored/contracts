@@ -1,69 +1,50 @@
 const { expect, assert } = require("chai");
 const { ethers } = require("hardhat");
-
-const FEE = "0.09";
-
-async function deploy_contract(name) {
-  const Contract = await ethers.getContractFactory(name);
-  const contract = await Contract.deploy();
-  await contract.deployed();
-  return contract;
-}
-
-async function deploy_contract_with_arg(name, arg) {
-  const Contract = await ethers.getContractFactory(name);
-  const contract = await Contract.deploy(arg);
-  await contract.deployed();
-  return contract;
-}
-
-async function expect_error_message(f, error_message) {
-  try {
-    await f();
-    expect(false, "expected '"+error_message+"' error, but no error thrown")
-  } catch(error) {
-    const isExpectedError = error.message.search(error_message) >= 0;
-    expect(isExpectedError, "expected error '"+error_message+"' but got: " + error)
-  }
-}
+const utils = require("../scripts/utils.js");
 
 describe("Posts", function () {
-  
-  it("Should add a message when send_message() called", async function () {
-    const contract = await deploy_contract("Posts");
 
-    expect(await contract.get_latest_message_index()).to.equal(-1);
+    let contract;
+    let message = "Hola, mundo!";
+    let contract_balance_before_withdrawal;
 
-    const message = "Hola, mundo!";
-    
-    const sendMessageTx = await contract.send_message(message, {
-        value: ethers.utils.parseEther(FEE)
+    it("Should be able to deploy contract", async function () {
+        contract = await utils.deploy_contract("Posts");
     });
-    await sendMessageTx.wait();
 
-    const latest_index = await contract.get_latest_message_index();
-    expect(latest_index).to.equal(0);
-    const [ret_message, ret_author, ret_timestamp] = await contract.get_message(latest_index);
-    expect(ret_message).to.equal(message);
-
-    const [owner] = await ethers.getSigners();
-    expect(ret_author).to.equal(owner.address);
-  });
-
-  it("Should be able to withdraw funds", async function () {
-    const contract = await deploy_contract("Posts");
-
-    expect(await contract.get_latest_message_index()).to.equal(-1);
-
-    const message = "Hola, mundo!";
-    const sendMessageTx = await contract.send_message(message, {
-        value: ethers.utils.parseEther(FEE)
+    it("get_latest_message_index() should be -1 after deployment", async function () {
+        expect(await contract.get_latest_message_index()).to.equal(-1);
     });
-    await sendMessageTx.wait();
-    
-    const withdrawTx = await contract.withdraw();
-    await withdrawTx.wait();
 
-    expect.fail("test does not yet test for arrival of funds");
-  });
+    it("Should be able to submit a post", async function () {
+        await utils.send_message(contract, message)
+    });
+
+    it("get_latest_message_index() should be 0 after first post submitted", async function () {
+        expect(await contract.get_latest_message_index()).to.equal(0);
+    });
+
+    it("Post on blockchain should equal post sent", async function () {
+        const [ret_message, ret_author, _] = await contract.get_message(0);
+        expect(ret_message).to.equal(message);
+        expect(ret_author).to.equal(await utils.own_address());
+    });
+
+    it("Contract should capture fees", async function () {
+        contract_balance_before_withdrawal = await utils.balance_on_address(contract.address);
+        expect(""+contract_balance_before_withdrawal).to.equal(utils.FEE);
+    });
+
+    it("Should be able to withdraw funds", async function () {
+
+        let own_balance_before_withdrawal = await utils.balance_on_address(await utils.own_address());
+        
+        const withdrawTx = await contract.withdraw();
+        await withdrawTx.wait();
+
+        let own_balance_after_withdrawal = await utils.balance_on_address(await utils.own_address());
+        let funds_received_from_withdrawal = Math.abs(own_balance_after_withdrawal - own_balance_before_withdrawal);
+
+        expect(funds_received_from_withdrawal).to.closeTo(contract_balance_before_withdrawal, utils.FEE * 0.01);
+    });
 });

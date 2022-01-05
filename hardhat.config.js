@@ -1,4 +1,5 @@
 require("@nomiclabs/hardhat-waffle");
+require('@nomiclabs/hardhat-ethers');
 require('@openzeppelin/hardhat-upgrades');
 
 // This is a sample Hardhat task. To learn how to create your own go to
@@ -21,14 +22,37 @@ let PRIVATE_KEY = fs.readFileSync('./private_key', 'utf8')
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
-  defaultNetwork: "matic",
+  defaultNetwork: "harmony",
   networks: {
     hardhat: {
     },
+    fantom: {
+        url: "https://rpc.ftm.tools/",
+        accounts: [`${PRIVATE_KEY}`]
+    },
     matic: {
-      url: "https://polygon-rpc.com",
-      accounts: [`${PRIVATE_KEY}`]
+        url: "https://polygon-rpc.com",
+        accounts: [`${PRIVATE_KEY}`]
+    },
+    harmony: {
+        url: "https://api.harmony.one",
+        accounts: [`${PRIVATE_KEY}`]
     }
   },
-  solidity: "0.8.4",
+  solidity: {
+      version: "0.8.4",
+      optimizer: {
+          enabled: false,
+          runs: 1000
+      }
+  },
+  /*
+  mocha: {
+    reporter: 'eth-gas-reporter',
+    reporterOptions : {
+        currency: "USD",
+        token: "MATIC",
+        url: "http://localhost:8545"
+    }
+  }*/
 };

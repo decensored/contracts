@@ -1,22 +1,25 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "hardhat/console.sol";
 
 
-contract Posts is Ownable {
+contract Posts is OwnableUpgradeable {
 
-    uint256 FEE = 9e16;
-    int256 counter = -1;
+    uint256 FEE;
+    int256 counter;
 
     mapping(int => Tweet) messages;
 
     event MessageSent(address indexed author, uint256 indexed fee, string message);
     event Withdrawal(uint256 indexed amount);
 
-    constructor() {
-        
+    function initialize() public initializer {
+        __Context_init_unchained();
+        __Ownable_init_unchained();
+        FEE = 0;
+        counter = -1;
     }
 
     function get_latest_message_index() public view returns (int) {
