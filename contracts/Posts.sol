@@ -3,21 +3,25 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "hardhat/console.sol";
+import "./Accounts.sol";
 
 
 contract Posts is OwnableUpgradeable {
 
+    Accounts public accounts;
+
     uint256 FEE;
     int256 counter;
 
-    mapping(int => Tweet) messages;
+    mapping(int => Post) posts;
 
-    event MessageSent(address indexed author, uint256 indexed fee, string message);
+    event PostSubmitted(uint256 indexed author, uint256 indexed fee, string message);
     event Withdrawal(uint256 indexed amount);
 
-    function initialize() public initializer {
+    function initialize(address accounts_address) public initializer {
         __Context_init_unchained();
         __Ownable_init_unchained();
+        accounts = Accounts(accounts_address);
         FEE = 0;
         counter = -1;
     }
@@ -34,16 +38,19 @@ contract Posts is OwnableUpgradeable {
         return FEE;
     }
 
-    function get_message(uint256 index) public view returns (Tweet memory) {
-        return messages[int256(index)];
+    function get_post(uint256 index) public view returns (Post memory) {
+        require(int256(index) <= counter, "Post does not exist");
+        return posts[int256(index)];
     }
 
-    function send_message(string memory message) payable public {
+    function submit_post(string memory message) payable public {
         //console.log("received %s tokens", msg.value);
         require(msg.value == FEE, "Incorrect fee paid");
+        uint256 user_id = accounts.id_by_address(msg.sender);
+        require(user_id > 0, "Cannot submit post: you are not signed up");
         counter++;
-        messages[counter] = Tweet(message, msg.sender, block.timestamp);
-        emit MessageSent(msg.sender, FEE, message);
+        posts[counter] = Post(message, user_id, block.timestamp);
+        emit PostSubmitted(user_id, FEE, message);
     }
 
     function withdraw() public onlyOwner {
@@ -55,8 +62,8 @@ contract Posts is OwnableUpgradeable {
     }
 }
 
-struct Tweet {
+struct Post {
     string message;
-    address author;
+    uint256 author;
     uint256 timestamp;
 }

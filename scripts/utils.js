@@ -1,7 +1,7 @@
 const { expect, assert } = require("chai");
 const { ethers, waffle } = require("hardhat");
 
-const FEE = "90000000000000000";
+const FEE = "0";
 const provider = waffle.provider;
 
 async function deploy_contract(name) {
@@ -19,9 +19,9 @@ async function deploy_contract_with_arg(name, arg) {
 }
 
 async function deploy_proxy(contract_name, args = [], initializer = "initialize") {
-    const Box = await ethers.getContractFactory(contract_name);
-    const box = await upgrades.deployProxy(Box, args, { initializer: initializer });
-    return box.deployed();
+    const Proxy = await ethers.getContractFactory(contract_name);
+    const proxy = await upgrades.deployProxy(Proxy, args, { initializer: initializer });
+    return proxy.deployed();
 }
 
 async function upgrade_proxy(new_contract_name, deployed_address) {
@@ -29,19 +29,25 @@ async function upgrade_proxy(new_contract_name, deployed_address) {
     return upgrades.upgradeProxy(deployed_address, Contract);
 }
 
-async function send_message(contract_posts, message) {
-    return contract_posts.send_message(message, {
+async function submit_post(contract_posts, message) {
+    return contract_posts.submit_post(message, {
         value: FEE
     }).then(tx => { tx.wait });
 }
 
 async function expect_error_message(f, error_message) {
+    let was_error_thrown;
     try {
         await f();
-        expect(false, "expected '" + error_message + "' error, but no error thrown")
+        was_error_thrown = false;
     } catch (error) {
-        const isExpectedError = error.message.search(error_message) >= 0;
-        expect(isExpectedError, "expected error '" + error_message + "' but got: " + error)
+        was_error_thrown = true;
+        if(error.message.search(error_message) <= 0) {
+            throw new Error("expected error '" + error_message + "' but got: " + error);
+        }
+    }
+    if(!was_error_thrown) {
+        throw new Error("expected '" + error_message + "' error, but no error thrown");
     }
 }
 
@@ -59,7 +65,7 @@ module.exports = {
     deploy_contract_with_arg,
     deploy_proxy,
     upgrade_proxy,
-    send_message,
+    submit_post,
     expect_error_message,
     own_address,
     balance_on_address,
