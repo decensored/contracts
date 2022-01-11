@@ -22,7 +22,7 @@ let PRIVATE_KEY = fs.readFileSync('./private_key', 'utf8')
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
-  defaultNetwork: "harmony",
+  defaultNetwork: "hardhat",
   networks: {
     hardhat: {
     },
@@ -37,6 +37,14 @@ module.exports = {
     harmony: {
         url: "https://api.harmony.one",
         accounts: [`${PRIVATE_KEY}`]
+    },
+    iota: {
+        url: "https://we.addiota.com",
+        accounts: [`${PRIVATE_KEY}`]
+    },
+    iota2: {
+        url: "https://we2.addiota.com",
+        accounts: [`${PRIVATE_KEY}`]
     }
   },
   solidity: {
@@ -46,13 +54,4 @@ module.exports = {
           runs: 1000
       }
   },
-  /*
-  mocha: {
-    reporter: 'eth-gas-reporter',
-    reporterOptions : {
-        currency: "USD",
-        token: "MATIC",
-        url: "http://localhost:8545"
-    }
-  }*/
 };

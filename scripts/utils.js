@@ -1,7 +1,6 @@
 const { expect, assert } = require("chai");
 const { ethers, waffle } = require("hardhat");
 
-const FEE = "0";
 const provider = waffle.provider;
 
 async function deploy_contract(name) {
@@ -31,7 +30,7 @@ async function upgrade_proxy(new_contract_name, deployed_address) {
 
 async function submit_post(contract_posts, message) {
     return contract_posts.submit_post(message, {
-        value: FEE
+        value: 0
     }).then(tx => { tx.wait });
 }
 
@@ -69,5 +68,4 @@ module.exports = {
     expect_error_message,
     own_address,
     balance_on_address,
-    FEE
 }

@@ -14,8 +14,8 @@ describe("Posts", function () {
         contract = await utils.deploy_proxy("Posts", [contract_accounts.address]);
     });
 
-    it("get_latest_message_index() should be -1 after deployment", async function () {
-        expect(await contract.get_latest_message_index()).to.equal(-1);
+    it("get_latest_post_index() should be -1 after deployment", async function () {
+        expect(await contract.get_latest_post_index()).to.equal(-1);
     });
 
     it("Should not be able to submit a post before signing up", async function () {
@@ -29,8 +29,8 @@ describe("Posts", function () {
         await utils.submit_post(contract, message)
     });
 
-    it("get_latest_message_index() should be 0 after first post submitted", async function () {
-        expect(await contract.get_latest_message_index()).to.equal(0);
+    it("get_latest_post_index() should be 0 after first post submitted", async function () {
+        expect(await contract.get_latest_post_index()).to.equal(0);
     });
 
     it("Post on blockchain should equal post submitted", async function () {
@@ -40,21 +40,21 @@ describe("Posts", function () {
         expect(author_address).to.equal(await utils.own_address());
     });
 
-    it("Contract should capture fees", async function () {
-        contract_balance_before_withdrawal = await utils.balance_on_address(contract.address);
-        expect(""+contract_balance_before_withdrawal).to.equal(utils.FEE);
-    });
+    it("Should be able to reply to post", async function () {
+        let message = "This is a reply";
+        let mother_post_index = await contract.get_latest_post_index();
+        await contract.reply(mother_post_index, message);
 
-    it("Should be able to withdraw funds", async function () {
+        let reply_index = await contract.get_latest_post_index();
+        expect(reply_index > mother_post_index, "no post submitted");
 
-        let own_balance_before_withdrawal = await utils.balance_on_address(await utils.own_address());
-        
-        const withdrawTx = await contract.withdraw();
-        await withdrawTx.wait();
+        const [ret_message, _, __] = await contract.get_post(reply_index);
+        expect(ret_message).to.equal(message, "Unexpected post message");
 
-        let own_balance_after_withdrawal = await utils.balance_on_address(await utils.own_address());
-        let funds_received_from_withdrawal = Math.abs(own_balance_after_withdrawal - own_balance_after_withdrawal);
+        let first_reply = await contract.replies_by_post(mother_post_index, 0);
+        expect(first_reply).to.equal(reply_index, "reply was not added as reply to mother post");
 
-        expect(own_balance_after_withdrawal).to.closeTo(own_balance_before_withdrawal + parseInt(utils.FEE), own_balance_before_withdrawal * 0.00000001);
+        let fetched_mother_post_index = await contract.mother_post_by_reply(reply_index);
+        expect(fetched_mother_post_index).to.equal(mother_post_index, "mother post was not added as mother post to reply");
     });
 });

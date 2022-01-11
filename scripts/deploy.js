@@ -2,9 +2,23 @@ const hre = require("hardhat");
 const utils = require("./utils.js");
 
 async function main() {
-    //let contract_posts = await utils.deploy_proxy("Posts");
-    //let contract_posts = await utils.upgrade_proxy("Posts", "0x6DCaB77ddA1b5597360e238942E5bd8958b3Dd7B");
-    //console.log("Posts deployed to:", contract_posts.address);
+
+    let accounts_address = "";
+
+    try {
+        if(accounts_address !== "") {
+            let contract_posts = await utils.deploy_proxy("Posts", [accounts_address]);
+            console.log("Posts deployed to:", contract_posts.address);
+        } else {
+            let contract_accounts = await utils.deploy_proxy("Accounts");
+            console.log("Accounts deployed to:", contract_accounts.address);
+    
+            let contract_posts = await utils.deploy_proxy("Posts", [contract_accounts.address]);
+            console.log("Posts deployed to:", contract_posts.address);
+        }
+    } catch(e) {
+        console.log("ERROR" + e)
+    }
 }
 
 main()

@@ -6,13 +6,13 @@ import "hardhat/console.sol";
 
 contract Accounts is OwnableUpgradeable {
 
-    uint256 signup_counter;
-    mapping(uint256 => address) public address_by_id;
-    mapping(uint256 => string) public username_by_id;
-    mapping(address => uint256) public id_by_address;
-    mapping(string => uint256) public id_by_username;
+    uint64 signup_counter;
+    mapping(uint64 => address) public address_by_id;
+    mapping(uint64 => string) public username_by_id;
+    mapping(address => uint64) public id_by_address;
+    mapping(string => uint64) public id_by_username;
 
-    event SignUp(uint256 indexed id, address indexed _address, string username);
+    event SignUp(uint64 indexed id, address indexed _address, string username);
 
     function initialize() public initializer {
         __Context_init_unchained();
@@ -21,7 +21,7 @@ contract Accounts is OwnableUpgradeable {
     }
 
     function sign_up(string calldata username) public {
-        uint256 id = signup_counter+1;
+        uint64 id = signup_counter+1;
         address _address = msg.sender;
 
         require(id_by_address[_address] == 0, "cannot sign up: address already signed up");
