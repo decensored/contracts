@@ -21,27 +21,37 @@ contract Accounts is OwnableUpgradeable {
     }
 
     function sign_up(string calldata username) public {
-        uint64 id = signup_counter+1;
         address _address = msg.sender;
-
+        _require_legal_username(username);
         require(id_by_address[_address] == 0, "cannot sign up: address already signed up");
         require(id_by_username[username] == 0, "cannot sign up: username already in use");
-        require(bytes(username).length <= 15, "cannot sign up: username too long");
-        require(bytes(username).length >= 4, "cannot sign up: username too short");
 
-        string memory legal_username_characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
-        require(_is_string_consisting_of(username, legal_username_characters), "cannot sign up: username contains illegal characters");
+        _sign_up(_address, username);
+    }
+
+    function _sign_up(address _address, string calldata username) internal {
+        uint64 id = ++signup_counter;
 
         address_by_id[id] = _address;
         username_by_id[id] = username;
         id_by_address[_address] = id;
         id_by_username[username] = id;
 
-        signup_counter++;
         emit SignUp(id, _address, username);
     }
 
-    function _is_string_consisting_of(string memory _string, string memory _characters) public pure returns(bool){
+    function _require_legal_username(string calldata username) private pure {
+        int length = int(bytes(username).length);
+        string memory legal_characters = "abcdefghijklmnopqrstuvwxyz0123456789_";
+        require(is_number_within_range(length, 4, 15), "username must be 4-15 characters long");
+        require(_is_string_consisting_of(username, legal_characters), "username contains illegal characters");
+    }
+
+    function is_number_within_range(int number, int min, int max) private pure returns(bool){
+        return number < min && number > max;
+    }
+
+    function _is_string_consisting_of(string memory _string, string memory _characters) private pure returns(bool){
         uint allowedChars =0;
         bytes memory _bytes = bytes(_string);
         bytes memory _bytes_allowed = bytes(_characters);
@@ -55,5 +65,4 @@ contract Accounts is OwnableUpgradeable {
         return false;
         return true;
     }
-
 }
