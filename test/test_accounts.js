@@ -14,19 +14,19 @@ describe("Accounts", function () {
     it("Should not be able to sign up with username shorter than 4 characters", async function () {
         await utils.expect_error_message(async () => {
             await contract.sign_up("abc")
-        }, "cannot sign up: username too short");
+        }, "username must be 4-15 characters long");
     });
 
     it("Should not be able to sign up with username longer than 15 characters", async function () {
         await utils.expect_error_message(async () => {
             await contract.sign_up("abcdefghijklmnop")
-        }, "cannot sign up: username too long");
+        }, "username must be 4-15 characters long");
     });
 
     it("Should not be able to sign up with username containing illegal characters", async function () {
         await utils.expect_error_message(async () => {
             await contract.sign_up("not.allowed")
-        }, "cannot sign up: username contains illegal characters");
+        }, "username contains illegal characters");
     });
 
     it("Should be able to sign up", async function () {

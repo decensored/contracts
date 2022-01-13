@@ -52,7 +52,7 @@ contract Spaces is OwnableUpgradeable {
     }
 
     function _encode_two_uint64_as_uint128(uint64 a, uint64 b) public pure returns(uint128) {
-        return a * 2**64-1 + b;
+        return uint128(a) * uint128(2**64-1) + uint128(b);
     }
 
     function _require_legal_space_name(string calldata space_name) private pure {

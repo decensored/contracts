@@ -4,15 +4,18 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "hardhat/console.sol";
 import "./Accounts.sol";
+import "./Spaces.sol";
 
 
 contract Posts is OwnableUpgradeable {
 
     Accounts public accounts;
+    Spaces public spaces;
 
     int64 counter;
 
-    mapping(uint64 => Post) posts;
+    mapping(uint64 => Post) public posts;
+    mapping(uint64 => uint64[]) public posts_by_space;
     mapping(uint64 => uint64[]) public posts_by_author;
     mapping(uint64 => uint64[]) public replies_by_post;
     mapping(uint64 => uint64) public mother_post_by_reply;
@@ -20,10 +23,11 @@ contract Posts is OwnableUpgradeable {
     event PostSubmitted(uint64 indexed author, string message);
     event Withdrawal(uint64 indexed amount);
 
-    function initialize(address accounts_address) public initializer {
+    function initialize(address spaces_address) public initializer {
         __Context_init_unchained();
         __Ownable_init_unchained();
-        accounts = Accounts(accounts_address);
+        spaces = Spaces(spaces_address);
+        accounts = spaces.accounts();
         counter = -1;
     }
 
@@ -31,26 +35,26 @@ contract Posts is OwnableUpgradeable {
         return counter;
     }
 
-    function get_post(uint64 index) public view returns (Post memory) {
-        require(int64(uint64(index)) <= counter, "Post does not exist");
-        return posts[uint64(index)];
-    }
-
-    function submit_post(string memory message) public {
+    function submit_post(uint64 space, string memory message) public {
 
         uint64 user_id = accounts.id_by_address(msg.sender);
         require(user_id > 0, "Cannot submit post: you are not signed up");
 
-        counter++;
-        posts[uint64(counter)] = Post(message, user_id, uint64(block.timestamp));
-        posts_by_author[user_id].push(uint64(counter));
+        uint64 index = uint64(++counter);
+        posts[index] = Post(message, user_id, uint64(block.timestamp), space);
+        posts_by_author[user_id].push(index);
+
+        bool is_member_of_space = spaces.is_member(space, user_id);
+        require(is_member_of_space, "Cannot submit post: you are not member of this space");
+        posts_by_space[space].push(index);
 
         emit PostSubmitted(user_id, message);
     }
 
     function reply(uint64 mother_post, string memory message) public {
         require(int64(mother_post) <= counter, "Mother post does not exist");
-        submit_post(message);
+        uint64 space = posts[mother_post].space;
+        submit_post(space, message);
         mother_post_by_reply[uint64(counter)] = mother_post;
         replies_by_post[mother_post].push(uint64(counter));
     }
@@ -68,4 +72,5 @@ struct Post {
     string message;
     uint64 author;
     uint64 timestamp;
+    uint64 space;
 }

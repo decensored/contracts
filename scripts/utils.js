@@ -28,8 +28,8 @@ async function upgrade_proxy(new_contract_name, deployed_address) {
     return upgrades.upgradeProxy(deployed_address, Contract);
 }
 
-async function submit_post(contract_posts, message) {
-    return contract_posts.submit_post(message, {
+async function submit_post(contract_posts, space, message) {
+    return contract_posts.submit_post(space, message, {
         value: 0
     }).then(tx => { tx.wait });
 }
