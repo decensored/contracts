@@ -5,3 +5,9 @@ contracts/artifacts
 cache/
 artifacts/
 .DS_Store
+.openzeppelin
+
+test/test_nfts.js
+test/test_nft_auctions.js
+contracts/NFTAuctions.sol
+contracts/NFTs.sol

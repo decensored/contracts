@@ -45,6 +45,10 @@ module.exports = {
     iota2: {
         url: "https://we2.addiota.com",
         accounts: [`${PRIVATE_KEY}`]
+    },
+    iota3: {
+        url: "https://we.jamesayden.com",
+        accounts: [`${PRIVATE_KEY}`]
     }
   },
   solidity: {
