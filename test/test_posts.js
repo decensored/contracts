@@ -5,6 +5,7 @@ const utils = require("../scripts/utils.js");
 describe("Posts", function () {
 
     let accounts;
+    let rate_control;
     let spaces;
     let posts;
 
@@ -12,7 +13,8 @@ describe("Posts", function () {
 
     it("Should be able to deploy contract", async function () {
         accounts = await utils.deploy_proxy("Accounts");
-        spaces = await utils.deploy_proxy("Spaces", [accounts.address]);
+        rate_control = await utils.deploy_proxy("RateControl")
+        spaces = await utils.deploy_proxy("Spaces", [accounts.address, rate_control.address]);
         posts = await utils.deploy_proxy("Posts", [spaces.address]);
     });
 
@@ -28,6 +30,7 @@ describe("Posts", function () {
 
     it("Should not be able to submit a post before creating being member of space", async function () {
         await accounts.sign_up("micro_hash");
+        await rate_control.set_account_rate_limit(await utils.own_address(), 10);
         await spaces.create("space1");
         utils.expect_error_message(async () => {
             await utils.submit_post(posts, 0, message)

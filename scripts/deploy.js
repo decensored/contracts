@@ -20,27 +20,28 @@ async function handle_error(error) {
     }
 }
 
-async function deploy_contract_accounts() {
-    let contract_accounts = await utils.deploy_proxy("Accounts");
-    return contract_accounts.address;
-}
-
-async function deploy_contract_posts(accounts_address) {
-    let contract_posts = await utils.deploy_proxy("Posts", [accounts_address]);
-    return contract_posts.address;
+async function deploy_contract(contract_name, args) {
+    let contract = await utils.deploy_proxy(contract_name, args);
+    return contract.address;
 }
 
 async function deploy_contracts() {
 
+    let rate_control_address = "";
     let accounts_address = "";
+    let spaces_address = "";
 
     for(let i = 0; i < 15; i++) {
         try {
-            if(accounts_address !== "") {
-                let posts_address = await deploy_contract_posts(accounts_address);
+            if(spaces_address !== "") {
+                let posts_address = await deploy_contract("Posts", [spaces_address]);
                 return posts_address;
+            } else if(rate_control_address !== "") {
+                spaces_address = await deploy_contract("Spaces", [accounts_address, rate_control_address]);
+            } else if(accounts_address !== "") {
+                rate_control_address = await deploy_contract("RateControl", []);
             } else {
-                accounts_address = await deploy_contract_accounts();
+                accounts_address = await deploy_contract("Accounts", []);
             }
         } catch(e) {
             let fatal_error = await handle_error(e);

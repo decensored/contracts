@@ -31,18 +31,19 @@ contract Accounts is OwnableUpgradeable {
 
     function _sign_up(address _address, string calldata username) internal {
         uint64 id = ++signup_counter;
+        string memory username_lower = _string_to_lower(username);
 
         address_by_id[id] = _address;
         username_by_id[id] = username;
         id_by_address[_address] = id;
-        id_by_username[username] = id;
+        id_by_username[username_lower] = id;
 
         emit SignUp(id, _address, username);
     }
 
     function _require_legal_username(string calldata username) private pure {
         int length = int(bytes(username).length);
-        string memory legal_characters = "abcdefghijklmnopqrstuvwxyz0123456789_";
+        string memory legal_characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIKLMNOPQRSTUVWXYZ0123456789_";
         require(is_number_within_range(length, 4, 15), "username must be 4-15 characters long");
         require(_is_string_consisting_of(username, legal_characters), "username contains illegal characters");
     }
@@ -64,5 +65,18 @@ contract Accounts is OwnableUpgradeable {
         if(allowedChars<_bytes.length)
         return false;
         return true;
+    }
+
+    function _string_to_lower(string memory input) internal pure returns (string memory) {
+        bytes memory bytes_input = bytes(input);
+        bytes memory bytes_output = new bytes(bytes_input.length);
+        for (uint i = 0; i < bytes_input.length; i++) {
+            if ((uint8(bytes_input[i]) >= 65) && (uint8(bytes_input[i]) <= 90)) {
+                bytes_output[i] = bytes1(uint8(bytes_input[i]) + 32);
+            } else {
+                bytes_output[i] = bytes_input[i];
+            }
+        }
+        return string(bytes_output);
     }
 }

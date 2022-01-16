@@ -5,6 +5,7 @@ const utils = require("../scripts/utils.js");
 describe("Spaces", function () {
 
     let accounts;
+    let rate_control;
     let spaces;
 
     let space1_name = "helloworld";
@@ -17,10 +18,12 @@ describe("Spaces", function () {
 
     it("Deploy contract", async function () {
         accounts = await utils.deploy_proxy("Accounts");
-        spaces = await utils.deploy_proxy("Spaces", [accounts.address]);
+        rate_control = await utils.deploy_proxy("RateControl");
+        spaces = await utils.deploy_proxy("Spaces", [accounts.address, rate_control.address]);
     });
 
     it("Create Space", async function () {
+        await rate_control.set_account_rate_limit(await utils.own_address(), 10);
         await spaces.create(space1_name);
     });
 
