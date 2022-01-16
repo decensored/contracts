@@ -17,13 +17,13 @@ describe("Spaces", function () {
     let members = [3, 6, 7];
 
     it("Deploy contract", async function () {
-        accounts = await utils.deploy_proxy("Accounts");
         rate_control = await utils.deploy_proxy("RateControl");
-        spaces = await utils.deploy_proxy("Spaces", [accounts.address, rate_control.address]);
+        accounts = await utils.deploy_proxy("Accounts", [rate_control.address]);
+        spaces = await utils.deploy_proxy("Spaces", [accounts.address]);
     });
 
     it("Create Space", async function () {
-        await rate_control.set_account_rate_limit(await utils.own_address(), 10);
+        await rate_control.set_rate_limit(await utils.own_address(), 10);
         await spaces.create(space1_name);
     });
 

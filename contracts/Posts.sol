@@ -3,12 +3,14 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "hardhat/console.sol";
+import "./RateControl.sol";
 import "./Accounts.sol";
 import "./Spaces.sol";
 
 
 contract Posts is OwnableUpgradeable {
 
+    RateControl public rate_control;
     Accounts public accounts;
     Spaces public spaces;
 
@@ -28,6 +30,7 @@ contract Posts is OwnableUpgradeable {
         __Ownable_init_unchained();
         spaces = Spaces(spaces_address);
         accounts = spaces.accounts();
+        rate_control = accounts.rate_control();
         counter = -1;
     }
 
@@ -36,6 +39,7 @@ contract Posts is OwnableUpgradeable {
     }
 
     function submit_post(uint64 space, string memory message) public {
+        rate_control.perform_action(msg.sender);
 
         uint64 user_id = accounts.id_by_address(msg.sender);
         require(user_id > 0, "Cannot submit post: you are not signed up");

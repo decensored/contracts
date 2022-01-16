@@ -20,16 +20,16 @@ contract Spaces is OwnableUpgradeable {
     mapping(uint64 => uint64) public owner_by_id;
     mapping(uint128 => bool) private membership;
 
-    function initialize(address accounts_address, address rate_control_address) public initializer {
+    function initialize(address accounts_address) public initializer {
         __Context_init_unchained();
         __Ownable_init_unchained();
         accounts = Accounts(accounts_address);
-        rate_control = RateControl(rate_control_address);
+        rate_control = RateControl(accounts.rate_control());
         id_counter = 0;
     }
 
     function create(string calldata name) public {
-        rate_control.perform_action();
+        rate_control.perform_action(msg.sender);
         require(id_by_name[name] == 0, "cannot create space: a space with this name already exists");
         uint64 owner = accounts.id_by_address(msg.sender);
         _create(name, owner);
@@ -43,7 +43,7 @@ contract Spaces is OwnableUpgradeable {
     }
 
     function set_membership(uint64 space, uint64 account, bool membership_state) public {
-        rate_control.perform_action();
+        rate_control.perform_action(msg.sender);
         uint64 account_sender = accounts.id_by_address(msg.sender);
         uint64 space_owner = owner_by_id[space];
         require(account_sender == space_owner, "cannot set membership for space: you do not own the space");

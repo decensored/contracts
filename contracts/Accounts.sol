@@ -3,8 +3,11 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "hardhat/console.sol";
+import "./RateControl.sol";
 
 contract Accounts is OwnableUpgradeable {
+
+    RateControl public rate_control;
 
     uint64 signup_counter;
     mapping(uint64 => address) public address_by_id;
@@ -14,13 +17,17 @@ contract Accounts is OwnableUpgradeable {
 
     event SignUp(uint64 indexed id, address indexed _address, string username);
 
-    function initialize() public initializer {
+    function initialize(address rate_control_address) public initializer {
         __Context_init_unchained();
         __Ownable_init_unchained();
         signup_counter = 0;
+        rate_control = RateControl(rate_control_address);
     }
 
     function sign_up(string calldata username) public {
+        
+        rate_control.perform_action(msg.sender);
+        
         address _address = msg.sender;
         _require_legal_username(username);
         require(id_by_address[_address] == 0, "cannot sign up: address already signed up");
@@ -44,11 +51,11 @@ contract Accounts is OwnableUpgradeable {
     function _require_legal_username(string calldata username) private pure {
         int length = int(bytes(username).length);
         string memory legal_characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIKLMNOPQRSTUVWXYZ0123456789_";
-        require(is_number_within_range(length, 4, 15), "username must be 4-15 characters long");
+        require(_is_number_within_range(length, 4, 15), "username must be 4-15 characters long");
         require(_is_string_consisting_of(username, legal_characters), "username contains illegal characters");
     }
 
-    function is_number_within_range(int number, int min, int max) private pure returns(bool){
+    function _is_number_within_range(int number, int min, int max) private pure returns(bool){
         return min < number && number < max;
     }
 

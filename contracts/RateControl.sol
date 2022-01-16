@@ -17,14 +17,14 @@ contract RateControl is OwnableUpgradeable {
         interval = 20*60;
     }
 
-    function set_account_rate_limit(address _address, uint64 actions_per_interval) public onlyOwner {
+    function set_rate_limit(address _address, uint64 actions_per_interval) public onlyOwner {
         actions_allowed_per_interval_by_address[_address] = actions_per_interval;
     }
 
-    function perform_action() public {
-        require(is_below_rate_limit(msg.sender), "you already reached your rate limit");
-        prune_old_actions(msg.sender);
-        action_timestamps_by_address[msg.sender].push(uint64(block.timestamp));
+    function perform_action(address _address) public {
+        require(is_below_rate_limit(_address), "you already reached your rate limit");
+        prune_old_actions(_address);
+        action_timestamps_by_address[_address].push(uint64(block.timestamp));
     }
 
     function prune_old_actions(address _address) internal {
