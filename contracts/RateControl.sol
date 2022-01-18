@@ -7,6 +7,7 @@ import "hardhat/console.sol";
 contract RateControl is OwnableUpgradeable {
 
     uint64 private interval;
+    bool private rate_control_enabled;
 
     mapping(address => uint64) private actions_allowed_per_interval_by_address;
     mapping(address => uint64[]) private action_timestamps_by_address;
@@ -15,10 +16,15 @@ contract RateControl is OwnableUpgradeable {
         __Context_init_unchained();
         __Ownable_init_unchained();
         interval = 20*60;
+        rate_control_enabled = true;
     }
 
     function set_rate_limit(address _address, uint64 actions_per_interval) public onlyOwner {
         actions_allowed_per_interval_by_address[_address] = actions_per_interval;
+    }
+
+    function set_rate_control_enabled(bool _rate_control_enabled) public onlyOwner {
+        rate_control_enabled = _rate_control_enabled;
     }
 
     function perform_action(address _address) public {
@@ -47,6 +53,11 @@ contract RateControl is OwnableUpgradeable {
     }
 
     function is_below_rate_limit(address _address) public view returns(bool) {
+
+        if(!rate_control_enabled) {
+            return true;
+        }
+
         uint64 timestamp_now = uint64(block.timestamp);
         uint64 actions_performed_within_interval = 0;
         for(uint64 i = 0; i < action_timestamps_by_address[_address].length; i++) {

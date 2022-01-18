@@ -62,4 +62,11 @@ describe("RateControl", function () {
             await rate_control_as_signer0.perform_action(signer0.address);
         }, "you already reached your rate limit");
     });
+
+    it("Rate control can be disabled", async function () {
+        await rate_control.set_rate_control_enabled(false);
+        for(let i = 0; i < 3; i++) {
+            await rate_control.perform_action(utils.own_address());
+        }
+    });
 });
