@@ -38,10 +38,13 @@ async function deploy_contracts() {
                 return posts_address;
             } else if(accounts_address !== "") {
                 spaces_address = await deploy_contract("Spaces", [accounts_address]);
+                console.log("Spaces: " + spaces_address);
             } else if(rate_control_address !== "") {
                 accounts_address = await deploy_contract("Accounts", [rate_control_address]);
+                console.log("Accounts: " + accounts_address);
             } else {
                 rate_control_address = await deploy_contract("RateControl", []);
+                console.log("RateControl: " + rate_control_address);
             }
         } catch(e) {
             let fatal_error = await handle_error(e);

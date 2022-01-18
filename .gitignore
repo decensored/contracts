@@ -1,5 +1,4 @@
-private_key
-package-lock.json
+./private_key
 node_modules/
 contracts/artifacts
 cache/
