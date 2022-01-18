@@ -27,6 +27,10 @@ contract RateControl is OwnableUpgradeable {
         rate_control_enabled = _rate_control_enabled;
     }
 
+    function set_interval(uint64 _interval) public onlyOwner {
+        interval = _interval;
+    }
+
     function perform_action(address _address) public {
         require(is_below_rate_limit(_address), "you already reached your rate limit");
         prune_old_actions(_address);
