@@ -48,8 +48,8 @@ contract Posts is OwnableUpgradeable {
         posts[index] = Post(message, user_id, uint64(block.timestamp), space);
         posts_by_author[user_id].push(index);
 
-        bool is_member_of_space = spaces.is_member(space, user_id);
-        require(is_member_of_space, "Cannot submit post: you are not member of this space");
+        bool is_blacklisted = spaces.is_blacklisted(space, user_id);
+        require(!is_blacklisted, "Cannot submit post: you are on this space's blacklist");
         posts_by_space[space].push(index);
 
         emit PostSubmitted(user_id, message);

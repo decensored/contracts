@@ -14,7 +14,7 @@ describe("Spaces", function () {
     let space1_id;
     let space2_id;
 
-    let members = [3, 6, 7];
+    let blacklist = [3, 6, 7];
 
     it("Deploy contract", async function () {
         rate_control = await utils.deploy_proxy("RateControl");
@@ -44,40 +44,40 @@ describe("Spaces", function () {
         expect(space2_id).to.equal(2);
     });
 
-    it("New space has no members", async function () {
+    it("New space has empty blacklist", async function () {
         for(let account = 0; account < 10; account++) {
-            let membership = await spaces.is_member(space1_id, account);
-            expect(membership).to.equal(false);
+            let is_blacklisted = await spaces.is_blacklisted(space1_id, account);
+            expect(is_blacklisted).to.equal(false);
         }
     });
 
-    it("Members can be added", async function () {
+    it("Accounts can be blacklisted", async function () {
 
-        for(let i = 0; i < members.length; i++) {
-            await spaces.set_membership(space1_id, members[i], true);
+        for(let i = 0; i < blacklist.length; i++) {
+            await spaces.add_account_to_blacklist(space1_id, blacklist[i]);
         }
 
         for(let account = 0; account < 10; account++) {
-            let membership = await spaces.is_member(space1_id, account);
-            expect(membership).to.equal(members.includes(account));
-        }
-    });
-
-    it("Space2 has no members after members added to space1", async function () {
-        for(let account = 0; account < 10; account++) {
-            let membership = await spaces.is_member(space2_id, account);
-            expect(membership).to.equal(false);
+            let is_blacklisted = await spaces.is_blacklisted(space1_id, account);
+            expect(is_blacklisted).to.equal(blacklist.includes(account));
         }
     });
 
-    it("Members can be removed", async function () {
+    it("Space2 has empty blacklist after accounts added to space1's blacklist", async function () {
+        for(let account = 0; account < 10; account++) {
+            let is_blacklisted = await spaces.is_blacklisted(space2_id, account);
+            expect(is_blacklisted).to.equal(false);
+        }
+    });
 
-        await spaces.set_membership(space1_id, members[0], false);
-        members = members.slice(1, 3);
+    it("Accounts can be removed from blacklist", async function () {
+
+        await spaces.remove_account_from_blacklist(space1_id, blacklist[0]);
+        blacklist = blacklist.slice(1, 3);
 
         for(let account = 0; account < 10; account++) {
-            let membership = await spaces.is_member(space1_id, account);
-            expect(membership).to.equal(members.includes(account));
+            let is_blacklisted = await spaces.is_blacklisted(space1_id, account);
+            expect(is_blacklisted).to.equal(blacklist.includes(account));
         }
     });
 });

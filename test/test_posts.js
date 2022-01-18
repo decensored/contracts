@@ -29,21 +29,26 @@ describe("Posts", function () {
         }, "Cannot submit post: you are not signed up");
     });
 
-    it("Should not be able to submit a post before being member of space", async function () {
+    it("Submit a post to space", async function () {
         await accounts.sign_up("micro_hash");
         await spaces.create("space1");
-        utils.expect_error_message(async () => {
-            await utils.submit_post(posts, 0, message)
-        }, "Cannot submit post: you are not member of this space");
-    });
-
-    it("Should be able to submit a post as member of space", async function () {
-        await spaces.set_membership(1, 1, true);
         await utils.submit_post(posts, 1, message)
     });
 
     it("get_latest_post_index() should be 0 after first post submitted", async function () {
         expect(await posts.get_latest_post_index()).to.equal(0);
+    });
+
+    it("Should not be able to submit posts when blacklisted", async function () {
+        await spaces.add_account_to_blacklist(1, 1);
+        utils.expect_error_message(async () => {
+            await utils.submit_post(posts, 1, message)
+        }, "Cannot submit post: you are on this space's blacklist");
+    });
+
+    it("Submit post after removed from blacklist", async function () {
+        await spaces.remove_account_from_blacklist(1, 1);
+        await utils.submit_post(posts, 1, message)
     });
 
     it("Post on blockchain should equal post submitted", async function () {

@@ -18,7 +18,7 @@ contract Spaces is OwnableUpgradeable {
     mapping(string => uint64) public id_by_name;
 
     mapping(uint64 => uint64) public owner_by_id;
-    mapping(uint128 => bool) private membership;
+    mapping(uint128 => bool) private blacklist;
 
     function initialize(address accounts_address) public initializer {
         __Context_init_unchained();
@@ -42,18 +42,26 @@ contract Spaces is OwnableUpgradeable {
         owner_by_id[id] = owner;
     }
 
-    function set_membership(uint64 space, uint64 account, bool membership_state) public {
+    function add_account_to_blacklist(uint64 space, uint64 account) public {
+        _set_blacklist_state(space, account, true);
+    }
+
+    function remove_account_from_blacklist(uint64 space, uint64 account) public {
+        _set_blacklist_state(space, account, false);
+    }
+
+    function _set_blacklist_state(uint64 space, uint64 account, bool is_to_be_blacklisted) internal {
         rate_control.perform_action(msg.sender);
         uint64 account_sender = accounts.id_by_address(msg.sender);
         uint64 space_owner = owner_by_id[space];
         require(account_sender == space_owner, "cannot set membership for space: you do not own the space");
         uint128 space_account_id = _encode_two_uint64_as_uint128(space, account);
-        membership[space_account_id] = membership_state;
+        blacklist[space_account_id] = is_to_be_blacklisted;
     }
 
-    function is_member(uint64 space, uint64 account) public view returns(bool) {
+    function is_blacklisted(uint64 space, uint64 account) public view returns(bool) {
         uint128 space_account_id = _encode_two_uint64_as_uint128(space, account);
-        return membership[space_account_id];
+        return blacklist[space_account_id];
     }
 
     function _encode_two_uint64_as_uint128(uint64 a, uint64 b) public pure returns(uint128) {

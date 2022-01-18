@@ -36,12 +36,12 @@ async function deploy_contracts() {
             if(spaces_address !== "") {
                 let posts_address = await deploy_contract("Posts", [spaces_address]);
                 return posts_address;
-            } else if(rate_control_address !== "") {
-                spaces_address = await deploy_contract("Spaces", [accounts_address, rate_control_address]);
             } else if(accounts_address !== "") {
-                rate_control_address = await deploy_contract("RateControl", []);
+                spaces_address = await deploy_contract("Spaces", [accounts_address]);
+            } else if(rate_control_address !== "") {
+                accounts_address = await deploy_contract("Accounts", [rate_control_address]);
             } else {
-                accounts_address = await deploy_contract("Accounts", []);
+                rate_control_address = await deploy_contract("RateControl", []);
             }
         } catch(e) {
             let fatal_error = await handle_error(e);
