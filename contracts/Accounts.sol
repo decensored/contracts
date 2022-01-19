@@ -12,6 +12,7 @@ contract Accounts is OwnableUpgradeable {
     uint64 signup_counter;
     mapping(uint64 => address) public address_by_id;
     mapping(uint64 => string) public username_by_id;
+    mapping(uint64 => string) public public_key_by_id;
     mapping(address => uint64) public id_by_address;
     mapping(string => uint64) public id_by_username;
 
@@ -46,6 +47,16 @@ contract Accounts is OwnableUpgradeable {
         id_by_username[username_lower] = id;
 
         emit SignUp(id, _address, username);
+    }
+
+    function set_public_key(string calldata public_key) public {
+
+        uint256 length = bytes(public_key).length;
+        require(length == 128, "Cannot set public key: invalid length");
+
+        rate_control.perform_action(msg.sender);
+        uint64 account = id_by_address[msg.sender];
+        public_key_by_id[account] = public_key;
     }
 
     function _require_legal_username(string calldata username) private pure {

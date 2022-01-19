@@ -67,6 +67,9 @@ contract Posts is OwnableUpgradeable {
         uint64 user_id = accounts.id_by_address(msg.sender);
         require(user_id > 0, "Cannot submit post: you are not signed up");
 
+        uint256 length = bytes(message).length;
+        require(length <= 280, "Cannot submit post: message too long");
+
         bool is_blacklisted = spaces.is_blacklisted(space, user_id);
         require(!is_blacklisted, "Cannot submit post: you are on this space's blacklist");
 
