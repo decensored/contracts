@@ -32,7 +32,7 @@ contract Accounts is OwnableUpgradeable {
         address _address = msg.sender;
         _require_legal_username(username);
         require(id_by_address[_address] == 0, "cannot sign up: address already signed up");
-        require(id_by_username[username] == 0, "cannot sign up: username already in use");
+        require(id_by_username[_string_to_lower(username)] == 0, "cannot sign up: username already in use");
 
         _sign_up(_address, username);
     }

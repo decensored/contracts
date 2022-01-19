@@ -12,7 +12,7 @@ contract Spaces is OwnableUpgradeable {
     Accounts public accounts;
     RateControl public rate_control;
 
-    uint64 private id_counter;
+    uint64 id_counter;
 
     mapping(uint64 => string) public name_by_id;
     mapping(string => uint64) public id_by_name;
@@ -34,6 +34,7 @@ contract Spaces is OwnableUpgradeable {
 
     function create(string calldata name) public {
         rate_control.perform_action(msg.sender);
+        _require_legal_space_name(name);
         require(id_by_name[name] == 0, "cannot create space: a space with this name already exists");
         uint64 owner = accounts.id_by_address(msg.sender);
         _create(name, owner);
