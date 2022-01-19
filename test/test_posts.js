@@ -40,7 +40,7 @@ describe("Posts", function () {
     });
 
     it("posts_length_by_space(space) should be 1 after first post submitted to space", async function () {
-        expect(await posts.posts_length_by_space(1)).to.equal(1);
+        expect(await posts.get_amount_of_posts_by_space(1)).to.equal(1);
     });
 
     it("Should not be able to submit posts when blacklisted", async function () {

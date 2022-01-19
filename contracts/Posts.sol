@@ -22,10 +22,6 @@ contract Posts is OwnableUpgradeable {
     mapping(uint64 => uint64[]) public posts_by_author;
     mapping(uint64 => uint64[]) public replies_by_post;
 
-    mapping(uint64 => uint64) public posts_length_by_space;
-    mapping(uint64 => uint64) public posts_length_by_author;
-    mapping(uint64 => uint64) public replies_length_by_post;
-
     event PostSubmitted(uint64 indexed author, string message);
     event Withdrawal(uint64 indexed amount);
 
@@ -46,12 +42,23 @@ contract Posts is OwnableUpgradeable {
         _submit_post(space, message, 0);
     }
 
+    function get_amount_of_posts_by_space(uint64 space) public view returns(uint64) {
+        return uint64(posts_by_space[space].length);
+    }
+
+    function get_amount_of_posts_by_author(uint64 author) public view returns(uint64) {
+        return uint64(posts_by_author[author].length);
+    }
+
+    function get_amount_of_replies_by_post(uint64 post) public view returns(uint64) {
+        return uint64(replies_by_post[post].length);
+    }
+
     function submit_reply(uint64 mother_post, string memory message) public {
         require(0 < mother_post && mother_post <= amount_of_posts, "Mother post does not exist");
         uint64 space = posts[mother_post].space;
         _submit_post(space, message, mother_post);
         replies_by_post[mother_post].push(amount_of_posts);
-        replies_length_by_post[mother_post] = uint64(replies_by_post[mother_post].length);
     }
 
     function _submit_post(uint64 space, string memory message, uint64 mother_post) internal {
@@ -66,19 +73,13 @@ contract Posts is OwnableUpgradeable {
         uint64 index = uint64(++amount_of_posts);
         posts[index] = Post(message, user_id, uint64(block.timestamp), space, mother_post);
         posts_by_author[user_id].push(index);
-        posts_length_by_author[user_id] = uint64(posts_by_author[user_id].length);
         posts_by_space[space].push(index);
-        posts_length_by_space[space] = uint64(posts_by_space[space].length);
 
         emit PostSubmitted(user_id, message);
     }
 
     function get_nth_post_index_by_author(uint64 author, uint64 n) public view returns(uint64) {
         return posts_by_author[author][n];
-    }
-
-    function get_amount_of_posts_by_author(uint64 author) public view returns(uint64) {
-        return uint64(posts_by_author[author].length);
     }
 }
 
