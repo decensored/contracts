@@ -19,8 +19,8 @@ describe("Posts", function () {
         posts = await utils.deploy_proxy("Posts", [spaces.address]);
     });
 
-    it("get_latest_post_index() should be -1 after deployment", async function () {
-        expect(await posts.get_latest_post_index()).to.equal(-1);
+    it("get_amount_of_posts() should be 0 after deployment", async function () {
+        expect(await posts.get_amount_of_posts()).to.equal(0);
     });
 
     it("Should not be able to submit a post before signing up", async function () {
@@ -35,8 +35,12 @@ describe("Posts", function () {
         await utils.submit_post(posts, 1, message)
     });
 
-    it("get_latest_post_index() should be 0 after first post submitted", async function () {
-        expect(await posts.get_latest_post_index()).to.equal(0);
+    it("get_amount_of_posts() should be 1 after first post submitted", async function () {
+        expect(await posts.get_amount_of_posts()).to.equal(1);
+    });
+
+    it("posts_length_by_space(space) should be 1 after first post submitted to space", async function () {
+        expect(await posts.posts_length_by_space(1)).to.equal(1);
     });
 
     it("Should not be able to submit posts when blacklisted", async function () {
@@ -52,7 +56,7 @@ describe("Posts", function () {
     });
 
     it("Post on blockchain should equal post submitted", async function () {
-        const [ret_message, ret_author, _, __] = await posts.posts(0);
+        const [ret_message, ret_author, _, __] = await posts.posts(1);
         expect(ret_message).to.equal(message);
         let author_address = await accounts.address_by_id(ret_author);
         expect(author_address).to.equal(await utils.own_address());
@@ -60,19 +64,18 @@ describe("Posts", function () {
 
     it("Should be able to reply to post", async function () {
         let message = "This is a reply";
-        let mother_post_index = await posts.get_latest_post_index();
-        await posts.reply(mother_post_index, message);
+        let mother_post_index = await posts.get_amount_of_posts();
+        await posts.submit_reply(mother_post_index, message);
 
-        let reply_index = await posts.get_latest_post_index();
+        let reply_index = await posts.get_amount_of_posts();
         expect(reply_index > mother_post_index, "no post submitted");
 
-        const [ret_message, _, __, ___] = await posts.posts(reply_index);
+        const [ret_message, _, __, ___, mother_post_index_as_read] = await posts.posts(reply_index);
         expect(ret_message).to.equal(message, "Unexpected post message");
 
         let first_reply = await posts.replies_by_post(mother_post_index, 0);
         expect(first_reply).to.equal(reply_index, "reply was not added as reply to mother post");
 
-        let fetched_mother_post_index = await posts.mother_post_by_reply(reply_index);
-        expect(fetched_mother_post_index).to.equal(mother_post_index, "mother post was not added as mother post to reply");
+        expect(mother_post_index_as_read).to.equal(mother_post_index, "mother post was not added as mother post to reply");
     });
 });

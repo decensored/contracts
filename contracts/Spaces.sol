@@ -12,7 +12,7 @@ contract Spaces is OwnableUpgradeable {
     Accounts public accounts;
     RateControl public rate_control;
 
-    uint64 id_counter;
+    uint64 private id_counter;
 
     mapping(uint64 => string) public name_by_id;
     mapping(string => uint64) public id_by_name;
@@ -26,6 +26,10 @@ contract Spaces is OwnableUpgradeable {
         accounts = Accounts(accounts_address);
         rate_control = RateControl(accounts.rate_control());
         id_counter = 0;
+    }
+
+    function get_latest_space_index() public view returns (uint64) {
+        return id_counter;
     }
 
     function create(string calldata name) public {

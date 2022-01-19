@@ -14,13 +14,17 @@ contract Posts is OwnableUpgradeable {
     Accounts public accounts;
     Spaces public spaces;
 
-    int64 counter;
+    uint64 private amount_of_posts;
 
     mapping(uint64 => Post) public posts;
+
     mapping(uint64 => uint64[]) public posts_by_space;
     mapping(uint64 => uint64[]) public posts_by_author;
     mapping(uint64 => uint64[]) public replies_by_post;
-    mapping(uint64 => uint64) public mother_post_by_reply;
+
+    mapping(uint64 => uint64) public posts_length_by_space;
+    mapping(uint64 => uint64) public posts_length_by_author;
+    mapping(uint64 => uint64) public replies_length_by_post;
 
     event PostSubmitted(uint64 indexed author, string message);
     event Withdrawal(uint64 indexed amount);
@@ -31,36 +35,42 @@ contract Posts is OwnableUpgradeable {
         spaces = Spaces(spaces_address);
         accounts = spaces.accounts();
         rate_control = accounts.rate_control();
-        counter = -1;
+        amount_of_posts = 0;
     }
 
-    function get_latest_post_index() public view returns (int) {
-        return counter;
+    function get_amount_of_posts() public view returns (uint64) {
+        return amount_of_posts;
     }
 
     function submit_post(uint64 space, string memory message) public {
+        _submit_post(space, message, 0);
+    }
+
+    function submit_reply(uint64 mother_post, string memory message) public {
+        require(0 < mother_post && mother_post <= amount_of_posts, "Mother post does not exist");
+        uint64 space = posts[mother_post].space;
+        _submit_post(space, message, mother_post);
+        replies_by_post[mother_post].push(amount_of_posts);
+        replies_length_by_post[mother_post] = uint64(replies_by_post[mother_post].length);
+    }
+
+    function _submit_post(uint64 space, string memory message, uint64 mother_post) internal {
         rate_control.perform_action(msg.sender);
 
         uint64 user_id = accounts.id_by_address(msg.sender);
         require(user_id > 0, "Cannot submit post: you are not signed up");
 
-        uint64 index = uint64(++counter);
-        posts[index] = Post(message, user_id, uint64(block.timestamp), space);
-        posts_by_author[user_id].push(index);
-
         bool is_blacklisted = spaces.is_blacklisted(space, user_id);
         require(!is_blacklisted, "Cannot submit post: you are on this space's blacklist");
+
+        uint64 index = uint64(++amount_of_posts);
+        posts[index] = Post(message, user_id, uint64(block.timestamp), space, mother_post);
+        posts_by_author[user_id].push(index);
+        posts_length_by_author[user_id] = uint64(posts_by_author[user_id].length);
         posts_by_space[space].push(index);
+        posts_length_by_space[space] = uint64(posts_by_space[space].length);
 
         emit PostSubmitted(user_id, message);
-    }
-
-    function reply(uint64 mother_post, string memory message) public {
-        require(int64(mother_post) <= counter, "Mother post does not exist");
-        uint64 space = posts[mother_post].space;
-        submit_post(space, message);
-        mother_post_by_reply[uint64(counter)] = mother_post;
-        replies_by_post[mother_post].push(uint64(counter));
     }
 
     function get_nth_post_index_by_author(uint64 author, uint64 n) public view returns(uint64) {
@@ -77,4 +87,5 @@ struct Post {
     uint64 author;
     uint64 timestamp;
     uint64 space;
+    uint64 mother_post;
 }
