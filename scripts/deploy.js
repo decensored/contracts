@@ -55,4 +55,9 @@ async function deploy_contracts() {
     }
 }
 
+async function upgrade() {
+    let contract = await utils.upgrade_proxy("Spaces", "0x787eb0FE0448C18F7d9a0B3bf6cE47433106a46e");
+    return contract.address;
+}
+
 deploy_contracts().then(console.log);

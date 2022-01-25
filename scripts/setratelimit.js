@@ -5,9 +5,9 @@ const utils = require("./utils.js");
 
 async function main() {
 
-    let posts_address = "0x58A04cA5F631846e764dBfbDa26A421DC213318C";
-    let spaces_address = "0xe193F436C450669af5f6A5F6079218f1673Bbbbd";
-    let accounts_address = "0x6DCaB77ddA1b5597360e238942E5bd8958b3Dd7B";
+    let posts_address = "0x1E41f418e97af96ee37c905e3e01D1e966E3A6C3";
+    let spaces_address = "0x787eb0FE0448C18F7d9a0B3bf6cE47433106a46e";
+    let accounts_address = "0x1FE6D6a72E140B3861325606b18DeE848a7e7B40";
     let rate_control_address = "0xDcFD1087B3c550EdCa92D4152b91d05dfb7b0Fc1";
 
     const Contract = await ethers.getContractFactory("RateControl");

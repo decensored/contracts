@@ -81,7 +81,7 @@ contract Spaces is OwnableUpgradeable {
     }
 
     function is_number_within_range(int number, int min, int max) private pure returns(bool){
-        return number < min && number > max;
+        return min < number && number < max;
     }
 
     function _is_string_consisting_of(string memory _string, string memory _characters) private pure returns(bool){
