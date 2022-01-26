@@ -52,9 +52,12 @@ async function deploy_contracts() {
       posts_address = await deploy_contract("Posts", [spaces_address]);
     // console.log("Posts: " + posts_address);
 
+    const network = hardhatConfig.networks[process.env.NETWORK];
     return {
-      network: process.env.NETWORK,
-      url: hardhatConfig.networks[process.env.NETWORK].url,
+      evmNode: network.url,
+      chainId: network.chainId,
+      contractPostsAddress: posts_address,
+
       ratecontrol_address,
       accounts_address,
       spaces_address,
