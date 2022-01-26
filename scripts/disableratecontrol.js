@@ -16,7 +16,7 @@ async function main() {
   //return await contract.set_rate_limit(address, 50);
 
   await contract.set_rate_control_enabled(false);
-  return "rate control disabled";
+  return "ratecontrol disabled";
 }
 
 // async function get_addreses() {
