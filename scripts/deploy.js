@@ -88,7 +88,7 @@ deploy_contracts().then((result) => {
   const fs = require("fs");
   const filename = "deployment.json";
   const json = JSON.stringify(result, null, 2);
-  fs.writeFileSync(filename, s);
+  fs.writeFileSync(filename, json);
   console.log("wrote              :", filename);
 
   console.log(json);
