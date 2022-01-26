@@ -2,6 +2,7 @@ require("dotenv").config();
 
 const hre = require("hardhat");
 const utils = require("./utils.js");
+const hardhatConfig = require("../hardhat.config.js");
 
 function sleep(ms) {
   console.error("sleeping " + ms + " ms ...");
@@ -52,6 +53,8 @@ async function deploy_contracts() {
     // console.log("Posts: " + posts_address);
 
     return {
+      network: process.env.NETWORK,
+      url: hardhatConfig.networks[process.env.NETWORK].url,
       ratecontrol_address,
       accounts_address,
       spaces_address,
