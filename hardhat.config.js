@@ -1,6 +1,8 @@
+require("dotenv").config();
+
 require("@nomiclabs/hardhat-waffle");
-require('@nomiclabs/hardhat-ethers');
-require('@openzeppelin/hardhat-upgrades');
+require("@nomiclabs/hardhat-ethers");
+require("@openzeppelin/hardhat-upgrades");
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -15,47 +17,66 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
 
-const fs = require('fs')
-let PRIVATE_KEY = fs.readFileSync('./private_key', 'utf8')
-
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
   defaultNetwork: "hardhat",
   networks: {
-    hardhat: {
-    },
+    hardhat: {},
     fantom: {
-        url: "https://rpc.ftm.tools/",
-        accounts: [`${PRIVATE_KEY}`]
+      url: "https://rpc.ftm.tools/",
+      accounts: [process.env.PRIVATEKEY],
     },
     matic: {
-        url: "https://polygon-rpc.com",
-        accounts: [`${PRIVATE_KEY}`]
+      url: "https://polygon-rpc.com",
+      accounts: [process.env.PRIVATEKEY],
     },
     harmony: {
-        url: "https://api.harmony.one",
-        accounts: [`${PRIVATE_KEY}`]
+      url: "https://api.harmony.one",
+      accounts: [process.env.PRIVATEKEY],
     },
-    iota: {
-        url: "https://we.addiota.com",
-        accounts: [`${PRIVATE_KEY}`]
+    "iota-we.addiota.com": {
+      url: "https://we.addiota.com",
+      accounts: [process.env.PRIVATEKEY],
     },
-    iota2: {
-        url: "https://we2.addiota.com",
-        accounts: [`${PRIVATE_KEY}`]
+    "iota-we2.addiota.com": {
+      url: "https://we2.addiota.com",
+      accounts: [process.env.PRIVATEKEY],
     },
-    iota3: {
-        url: "https://we.jamesayden.com",
-        accounts: [`${PRIVATE_KEY}`]
-    }
+    "iota-we.jamesayden.com": {
+      url: "https://we.jamesayden.com",
+      accounts: [process.env.PRIVATEKEY],
+    },
+    "iota-evm.wasp.sc.iota.org": {
+      url: "https://evm.wasp.sc.iota.org",
+      chainId: 1074,
+      gasprice: 0,
+      accounts: [process.env.PRIVATEKEY],
+      timeout: 60000,
+    },
+
+    "iota-evm.wasp.sc.iota-defi.com": {
+      url: "https://evm.wasp.sc.iota-defi.com",
+      chainId: 1075,
+      gasprice: 0,
+      accounts: [process.env.PRIVATEKEY],
+      timeout: 60000,
+    },
+
+    "iota-evm.wasp.sc.coordicide.com": {
+      url: "https://evm.wasp.sc.coordicide.com",
+      chainId: 1076,
+      gasprice: 0,
+      accounts: [process.env.PRIVATEKEY],
+      timeout: 60000,
+    },
   },
   solidity: {
-      version: "0.8.4",
-      optimizer: {
-          enabled: false,
-          runs: 1000
-      }
+    version: "0.8.4",
+    optimizer: {
+      enabled: false,
+      runs: 1000,
+    },
   },
 };
