@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "deploy": "dotenv cross-var npx hardhat run scripts/deploy.js --network %NETWORK% | tee deployment.json",
-    "disableratecontrol": "dotenv cross-var npx hardhat run scripts/disableratecontrol.js --network %NETWORK%",
+    "deploy": "dotenv npx hardhat run scripts/deploy.js",
+    "disableratecontrol": "dotenv npx hardhat run scripts/disableratecontrol.js",
     "deploy-without-ratecontrol": "npm run deploy && npm run disableratecontrol",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -18,7 +18,6 @@
     "@openzeppelin/hardhat-upgrades": "^1.12.0",
     "@openzeppelin/truffle-upgrades": "^1.11.0",
     "chai": "^4.3.4",
-    "cross-var": "^1.1.0",
     "dotenv": "^14.3.2",
     "dotenv-cli": "^4.1.1",
     "eth-gas-reporter": "^0.2.23",
