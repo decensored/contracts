@@ -14,10 +14,8 @@ contract Spaces is OwnableUpgradeable {
 
     uint64 id_counter;
 
-    mapping(uint64 => string) public name_by_id;
+    mapping(uint64 => Space) public spaces;
     mapping(string => uint64) public id_by_name;
-
-    mapping(uint64 => uint64) public owner_by_id;
     mapping(uint128 => bool) private blacklist;
 
     function initialize(address accounts_address) public initializer {
@@ -42,9 +40,8 @@ contract Spaces is OwnableUpgradeable {
 
     function _create(string calldata name, uint64 owner) internal {
         uint64 id = ++id_counter;
-        name_by_id[id] = name;
+        spaces[id] = Space(id, owner, name);
         id_by_name[name] = id;
-        owner_by_id[id] = owner;
     }
 
     function add_account_to_blacklist(uint64 space, uint64 account) public {
@@ -58,7 +55,7 @@ contract Spaces is OwnableUpgradeable {
     function _set_blacklist_state(uint64 space, uint64 account, bool is_to_be_blacklisted) internal {
         rate_control.perform_action(msg.sender);
         uint64 account_sender = accounts.id_by_address(msg.sender);
-        uint64 space_owner = owner_by_id[space];
+        uint64 space_owner = spaces[space].owner;
         require(account_sender == space_owner, "cannot set membership for space: you do not own the space");
         uint128 space_account_id = _encode_two_uint64_as_uint128(space, account);
         blacklist[space_account_id] = is_to_be_blacklisted;
@@ -98,4 +95,10 @@ contract Spaces is OwnableUpgradeable {
         return false;
         return true;
     }
+}
+
+struct Space {
+    uint64 id;
+    uint64 owner;
+    string name;
 }
