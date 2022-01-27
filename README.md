@@ -16,9 +16,14 @@ npx hardhat test
 
 ## Deployment
 
-To deploy the smart contract on Polygon, you need MATIC tokens.
-Put the private key of the account with which you want to pay the transaction fees into the `private_key` file. Then run:
+Copy .env.example to .env and edit .env
 
-```
-npx run scripts/deploy.js
-```
+> npm run deploy
+
+optionally
+
+> npm run disableratecontrol
+
+or to do it all at once
+
+> npm run deploy-without-ratecontrol

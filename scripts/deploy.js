@@ -1,63 +1,95 @@
+require("dotenv").config();
+
 const hre = require("hardhat");
 const utils = require("./utils.js");
+const hardhatConfig = require("../hardhat.config.js");
+const { ErrorDescription } = require("@ethersproject/abi/lib/interface");
 
 function sleep(ms) {
-    console.error("sleeping " + ms + " ms ...")
-    return new Promise(resolve => setTimeout(resolve, ms));
+  // console.error("sleeping " + ms + " ms ...");
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function handle_error(error) {
-
-    if(error.message.includes("Bad Gateway")) {
-        console.log("IOTA EVM node is not yet ready.");
-        await sleep(30000);
-        return false;
-    } else if(error.message.includes("404 page not found")) {
-        return "IOTA EVM node needs a restart.";
-    } else {
-        console.error("ERROR " + error.message.substr(0, 100))
-        return false;
-    }
+  if (error.message.includes("Bad Gateway")) {
+    console.warn("(warning) IOTA EVM node is not yet ready.");
+    await sleep(30 * 1000);
+    return false;
+  } else if (error.message.includes("404 page not found")) {
+    console.error("(fatal error) IOTA EVM node needs a restart.");
+    return true;
+  } else if (error.errno === "ENOTFOUND") {
+    console.error("(fatal error) IOTA EVM node seem unreachbale.");
+    return true;
+  } else {
+    console.warn("(warning)", error.message.substr(0, 100));
+    await sleep(1 * 1000);
+    return false;
+  }
 }
 
 async function deploy_contract(contract_name, args) {
-    let contract = await utils.deploy_proxy(contract_name, args);
-    return contract.address;
+  let contract;
+  console.log("deploy_contract    :", contract_name, args);
+
+  for (;;) {
+    try {
+      contract = await utils.deploy_proxy(contract_name, args);
+      break;
+    } catch (e) {
+      // console.log(e);
+      const fatal_error = await handle_error(e);
+      if (fatal_error) process.exit(-1);
+    }
+  }
+
+  return contract.address;
 }
 
 async function deploy_contracts() {
+  console.log("network            :", process.env.HARDHAT_NETWORK);
 
-    let rate_control_address = "";
-    let accounts_address = "";
-    let spaces_address = "";
+  let ratecontrol_address =
+    process.env.RATECONTROL_ADDRESS ||
+    (await deploy_contract("RateControl", []));
+  console.log("ratecontrol_address:", ratecontrol_address);
 
-    for(let i = 0; i < 15; i++) {
-        try {
-            if(spaces_address !== "") {
-                let posts_address = await deploy_contract("Posts", [spaces_address]);
-                return posts_address;
-            } else if(accounts_address !== "") {
-                spaces_address = await deploy_contract("Spaces", [accounts_address]);
-                console.log("Spaces: " + spaces_address);
-            } else if(rate_control_address !== "") {
-                accounts_address = await deploy_contract("Accounts", [rate_control_address]);
-                console.log("Accounts: " + accounts_address);
-            } else {
-                rate_control_address = await deploy_contract("RateControl", []);
-                console.log("RateControl: " + rate_control_address);
-            }
-        } catch(e) {
-            let fatal_error = await handle_error(e);
-            if(fatal_error) {
-                return fatal_error;
-            }
-        }
-    }
+  let accounts_address =
+    process.env.ACCOUNTS_ADDRESS ||
+    (await deploy_contract("Accounts", [ratecontrol_address]));
+  console.log("accounts_address   :", accounts_address);
+
+  let spaces_address =
+    process.env.SPACES_ADDRESS ||
+    (await deploy_contract("Spaces", [accounts_address]));
+  console.log("spaces_address     :", spaces_address);
+
+  let posts_address =
+    process.env.POSTS_ADDRESS ||
+    (await deploy_contract("Posts", [spaces_address]));
+  console.log("posts_address      :", posts_address);
+
+  const network = hardhatConfig.networks[process.env.HARDHAT_NETWORK];
+  return {
+    deeplink: `${process.env.FRONTEND_DOMAIN}?evmNode=${encodeURIComponent(
+      network.url
+    )}&contractPostsAddress=${encodeURIComponent(posts_address)}`,
+    evmNode: network.url,
+    // chainId: network.chainId,
+
+    ratecontrol_address,
+    accounts_address,
+    spaces_address,
+    posts_address,
+  };
 }
 
-async function upgrade() {
-    let contract = await utils.upgrade_proxy("Spaces", "0x787eb0FE0448C18F7d9a0B3bf6cE47433106a46e");
-    return contract.address;
-}
+deploy_contracts().then((result) => {
+  const fs = require("fs");
+  const filename = "deployment.json";
+  const json = JSON.stringify(result, null, 2);
+  fs.writeFileSync(filename, json);
+  console.log("wrote              :", filename);
 
-deploy_contracts().then(console.log);
+  console.log(json);
+});
