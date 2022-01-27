@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "deploy": "dotenv npx hardhat run scripts/deploy.js",
+    "generate-abis": "npx solcjs --abi --include-path node_modules/ --base-path ./ ./contracts/Posts.sol -o abis && rm abis/@openzeppelin* abis/hardhat_console_sol_console.abi",
+    "deploy": "npm run generate-abis && dotenv npx hardhat run scripts/deploy.js",
     "disableratecontrol": "dotenv npx hardhat run scripts/disableratecontrol.js",
     "deploy-without-ratecontrol": "npm run deploy && npm run disableratecontrol",
     "test": "echo \"Error: no test specified\" && exit 1"
