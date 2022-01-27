@@ -67,7 +67,7 @@ contract Accounts is OwnableUpgradeable {
     }
 
     function _is_number_within_range(int number, int min, int max) private pure returns(bool){
-        return min < number && number < max;
+        return number >= min && number <= max;
     }
 
     function _is_string_consisting_of(string memory _string, string memory _characters) private pure returns(bool){
