@@ -8,7 +8,7 @@
     "deploy": "npm run generate-abis && dotenv npx hardhat run scripts/deploy.js",
     "disableratecontrol": "dotenv npx hardhat run scripts/disableratecontrol.js",
     "deploy-without-ratecontrol": "npm run deploy && npm run disableratecontrol",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npx hardhat test"
   },
   "author": "",
   "license": "MIT",
