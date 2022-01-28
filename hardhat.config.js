@@ -48,6 +48,11 @@ module.exports = {
       url: "https://we.jamesayden.com",
       accounts: [process.env.PRIVATEKEY],
     },
+    "hh.addiota.com": {
+      url: "https://hh.addiota.com",
+      accounts: [process.env.PRIVATEKEY],
+      gasprice: 0,
+    },
     "iota-evm.wasp.sc.iota.org": {
       url: "https://evm.wasp.sc.iota.org",
       chainId: 1074,
