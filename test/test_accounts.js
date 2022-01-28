@@ -33,7 +33,7 @@ describe("Accounts", function () {
     });
 
     it("Should be able to sign up", async function () {
-        await contract.sign_up("micro_hash")
+        await contract.sign_up("a2_Z")
     });
 
     it("Should not be able to sign up twice", async function () {
