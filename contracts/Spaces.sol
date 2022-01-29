@@ -3,14 +3,11 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "hardhat/console.sol";
-import "./Accounts.sol";
-import "./RateControl.sol";
-
+import "./Contracts.sol";
 
 contract Spaces is OwnableUpgradeable {
 
-    Accounts public accounts;
-    RateControl public rate_control;
+    Contracts public contracts;
 
     uint64 id_counter;
 
@@ -18,11 +15,10 @@ contract Spaces is OwnableUpgradeable {
     mapping(string => uint64) public id_by_name;
     mapping(uint128 => bool) private blacklist;
 
-    function initialize(address accounts_address) public initializer {
+    function initialize(address contracts_address) public initializer {
         __Context_init_unchained();
         __Ownable_init_unchained();
-        accounts = Accounts(accounts_address);
-        rate_control = RateControl(accounts.rate_control());
+        contracts = Contracts(contracts_address);
         id_counter = 0;
     }
 
@@ -31,10 +27,10 @@ contract Spaces is OwnableUpgradeable {
     }
 
     function create(string calldata name) public {
-        rate_control.perform_action(msg.sender);
+        contracts.rate_control().perform_action(msg.sender);
         _require_legal_space_name(name);
         require(id_by_name[name] == 0, "cannot create space: a space with this name already exists");
-        uint64 owner = accounts.id_by_address(msg.sender);
+        uint64 owner = contracts.accounts().id_by_address(msg.sender);
         _create(name, owner);
     }
 
@@ -53,8 +49,8 @@ contract Spaces is OwnableUpgradeable {
     }
 
     function _set_blacklist_state(uint64 space, uint64 account, bool is_to_be_blacklisted) internal {
-        rate_control.perform_action(msg.sender);
-        uint64 account_sender = accounts.id_by_address(msg.sender);
+        contracts.rate_control().perform_action(msg.sender);
+        uint64 account_sender = contracts.accounts().id_by_address(msg.sender);
         uint64 space_owner = spaces[space].owner;
         require(account_sender == space_owner, "cannot set membership for space: you do not own the space");
         uint128 space_account_id = _encode_two_uint64_as_uint128(space, account);

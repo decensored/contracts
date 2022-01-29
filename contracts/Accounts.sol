@@ -3,11 +3,11 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "hardhat/console.sol";
-import "./RateControl.sol";
+import "./Contracts.sol";
 
 contract Accounts is OwnableUpgradeable {
 
-    RateControl public rate_control;
+    Contracts public contracts;
 
     uint64 signup_counter;
     mapping(uint64 => address) public address_by_id;
@@ -18,16 +18,16 @@ contract Accounts is OwnableUpgradeable {
 
     event SignUp(uint64 indexed id, address indexed _address, string username);
 
-    function initialize(address rate_control_address) public initializer {
+    function initialize(address contracts_address) public initializer {
         __Context_init_unchained();
         __Ownable_init_unchained();
+        contracts = Contracts(contracts_address);
         signup_counter = 0;
-        rate_control = RateControl(rate_control_address);
     }
 
     function sign_up(string calldata username) public {
         
-        rate_control.perform_action(msg.sender);
+        contracts.rate_control().perform_action(msg.sender);
         
         address _address = msg.sender;
         _require_legal_username(username);
@@ -54,7 +54,7 @@ contract Accounts is OwnableUpgradeable {
         uint256 length = bytes(public_key).length;
         require(length == 128, "Cannot set public key: invalid length");
 
-        rate_control.perform_action(msg.sender);
+        contracts.rate_control().perform_action(msg.sender);
         uint64 account = id_by_address[msg.sender];
         public_key_by_id[account] = public_key;
     }

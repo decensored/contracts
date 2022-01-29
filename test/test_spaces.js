@@ -4,6 +4,7 @@ const utils = require("../scripts/utils.js");
 
 describe("Spaces", function () {
 
+    let contracts;
     let accounts;
     let rate_control;
     let spaces;
@@ -17,9 +18,16 @@ describe("Spaces", function () {
     let blacklist = [3, 6, 7];
 
     it("Deploy contract", async function () {
+
+        contracts = await utils.deploy_proxy("Contracts");
+
         rate_control = await utils.deploy_proxy("RateControl");
-        accounts = await utils.deploy_proxy("Accounts", [rate_control.address]);
-        spaces = await utils.deploy_proxy("Spaces", [accounts.address]);
+        accounts = await utils.deploy_proxy("Accounts", [contracts.address]);
+        spaces = await utils.deploy_proxy("Spaces", [contracts.address]);
+
+        await contracts.set_rate_control(rate_control.address);
+        await contracts.set_accounts(accounts.address);
+        await contracts.set_spaces(spaces.address);
     });
 
     it("Create Space", async function () {

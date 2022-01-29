@@ -3,16 +3,12 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "hardhat/console.sol";
-import "./RateControl.sol";
-import "./Accounts.sol";
-import "./Spaces.sol";
+import "./Contracts.sol";
 
 
 contract Posts is OwnableUpgradeable {
 
-    RateControl public rate_control;
-    Accounts public accounts;
-    Spaces public spaces;
+    Contracts public contracts;
 
     uint64 private amount_of_posts;
 
@@ -25,12 +21,10 @@ contract Posts is OwnableUpgradeable {
     event PostSubmitted(uint64 indexed author, string message);
     event Withdrawal(uint64 indexed amount);
 
-    function initialize(address spaces_address) public initializer {
+    function initialize(address contracts_address) public initializer {
         __Context_init_unchained();
         __Ownable_init_unchained();
-        spaces = Spaces(spaces_address);
-        accounts = spaces.accounts();
-        rate_control = accounts.rate_control();
+        contracts = Contracts(contracts_address);
         amount_of_posts = 0;
     }
 
@@ -62,15 +56,15 @@ contract Posts is OwnableUpgradeable {
     }
 
     function _submit_post(uint64 space, string memory message, uint64 mother_post) internal {
-        rate_control.perform_action(msg.sender);
+        contracts.rate_control().perform_action(msg.sender);
 
-        uint64 user_id = accounts.id_by_address(msg.sender);
+        uint64 user_id = contracts.accounts().id_by_address(msg.sender);
         require(user_id > 0, "Cannot submit post: you are not signed up");
 
         uint256 length = bytes(message).length;
         require(length <= 280, "Cannot submit post: message too long");
 
-        bool is_blacklisted = spaces.is_blacklisted(space, user_id);
+        bool is_blacklisted = contracts.spaces().is_blacklisted(space, user_id);
         require(!is_blacklisted, "Cannot submit post: you are on this space's blacklist");
 
         uint64 index = uint64(++amount_of_posts);

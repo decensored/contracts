@@ -4,14 +4,20 @@ const utils = require("../scripts/utils.js");
 
 describe("Accounts", function () {
 
+    let contracts;
     let rate_control;
     let contract;
     let [addr0, addr1, addr2] = [undefined, undefined, undefined];
 
     it("Should be able to deploy contract", async function () {
+
+        contracts = await utils.deploy_proxy("Contracts");
+
         rate_control = await utils.deploy_proxy("RateControl");
         await rate_control.set_rate_limit(await utils.own_address(), 10);
-        contract = await utils.deploy_proxy("Accounts", [rate_control.address]);
+        await contracts.set_rate_control(rate_control.address);
+
+        contract = await utils.deploy_proxy("Accounts", [contracts.address]);
     });
 
     it("Should not be able to sign up with username shorter than 4 characters", async function () {

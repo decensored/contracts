@@ -49,25 +49,38 @@ async function deploy_contract(contract_name, args) {
 async function deploy_contracts() {
   console.log("network            :", process.env.HARDHAT_NETWORK);
 
-  let ratecontrol_address =
+  let contracts_address =
+    process.env.CONTRACTS_ADDRESS ||
+    (await deploy_contract("Contracts", []));
+  console.log("contracts_address:", contracts_address);
+
+  let rate_control_address =
     process.env.RATECONTROL_ADDRESS ||
     (await deploy_contract("RateControl", []));
-  console.log("ratecontrol_address:", ratecontrol_address);
+  console.log("ratecontrol_address:", rate_control_address);
 
   let accounts_address =
     process.env.ACCOUNTS_ADDRESS ||
-    (await deploy_contract("Accounts", [ratecontrol_address]));
+    (await deploy_contract("Accounts", [contracts_address]));
   console.log("accounts_address   :", accounts_address);
 
   let spaces_address =
     process.env.SPACES_ADDRESS ||
-    (await deploy_contract("Spaces", [accounts_address]));
+    (await deploy_contract("Spaces", [contracts_address]));
   console.log("spaces_address     :", spaces_address);
 
   let posts_address =
     process.env.POSTS_ADDRESS ||
-    (await deploy_contract("Posts", [spaces_address]));
+    (await deploy_contract("Posts", [contracts_address]));
   console.log("posts_address      :", posts_address);
+
+  const Contracts = await ethers.getContractFactory("Contracts");
+  const contracts = await Contracts.attach(contracts_address);
+
+  contracts.set_rate_control(rate_control_address);
+  contracts.set_accounts(accounts_address);
+  contracts.set_spaces(spaces_address);
+  contracts.set_posts(posts_address);
 
   const network = hardhatConfig.networks[process.env.HARDHAT_NETWORK];
   return {
@@ -77,7 +90,8 @@ async function deploy_contracts() {
     evmNode: network.url,
     // chainId: network.chainId,
 
-    ratecontrol_address,
+    contracts_address,
+    rate_control_address,
     accounts_address,
     spaces_address,
     posts_address,

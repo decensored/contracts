@@ -8,7 +8,7 @@ function string_to_bytes(str) {
     return utf8Encode.encode(str);
 }
 
-describe.only("Tokens", function () {
+describe("Tokens", function () {
 
     let tokens;
     let nonce = "Hello world!";

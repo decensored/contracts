@@ -12,11 +12,19 @@ describe("Posts", function () {
     let message = "Hola, mundo!";
 
     it("Should be able to deploy contract", async function () {
-        rate_control = await utils.deploy_proxy("RateControl")
+
+        contracts = await utils.deploy_proxy("Contracts");
+
+        rate_control = await utils.deploy_proxy("RateControl");
         await rate_control.set_rate_limit((await utils.own_address()), 10);
-        accounts = await utils.deploy_proxy("Accounts", [rate_control.address]);
-        spaces = await utils.deploy_proxy("Spaces", [accounts.address]);
-        posts = await utils.deploy_proxy("Posts", [spaces.address]);
+        accounts = await utils.deploy_proxy("Accounts", [contracts.address]);
+        spaces = await utils.deploy_proxy("Spaces", [contracts.address]);
+        posts = await utils.deploy_proxy("Posts", [contracts.address]);
+
+        await contracts.set_rate_control(rate_control.address);
+        await contracts.set_accounts(accounts.address);
+        await contracts.set_spaces(spaces.address);
+        await contracts.set_posts(posts.address);
     });
 
     it("get_amount_of_posts() should be 0 after deployment", async function () {
