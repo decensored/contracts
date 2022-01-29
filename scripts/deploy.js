@@ -52,7 +52,7 @@ async function deploy_contracts() {
   let contracts_address =
     process.env.CONTRACTS_ADDRESS ||
     (await deploy_contract("Contracts", []));
-  console.log("contracts_address:", contracts_address);
+  console.log("contracts_address  :", contracts_address);
 
   let rate_control_address =
     process.env.RATECONTROL_ADDRESS ||
@@ -62,7 +62,7 @@ async function deploy_contracts() {
   let tokens_address =
     process.env.TOKENS_ADDRESS ||
     (await deploy_contract("Tokens", []));
-  console.log("tokens_address:", tokens_address);
+  console.log("tokens_address     :", tokens_address);
 
   let accounts_address =
     process.env.ACCOUNTS_ADDRESS ||
@@ -81,12 +81,11 @@ async function deploy_contracts() {
 
   const Contracts = await ethers.getContractFactory("Contracts");
   const contracts = await Contracts.attach(contracts_address);
-
-  contracts.set_rate_control(rate_control_address);
-  contracts.set_tokens(tokens_address);
-  contracts.set_accounts(accounts_address);
-  contracts.set_spaces(spaces_address);
-  contracts.set_posts(posts_address);
+  await contracts.set_rate_control(rate_control_address);
+  await contracts.set_tokens(tokens_address);
+  await contracts.set_accounts(accounts_address);
+  await contracts.set_spaces(spaces_address);
+  await contracts.set_posts(posts_address);
 
   const network = hardhatConfig.networks[process.env.HARDHAT_NETWORK];
   return {
