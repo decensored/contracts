@@ -59,6 +59,11 @@ async function deploy_contracts() {
     (await deploy_contract("RateControl", []));
   console.log("ratecontrol_address:", rate_control_address);
 
+  let tokens_address =
+    process.env.TOKENS_ADDRESS ||
+    (await deploy_contract("Tokens", []));
+  console.log("tokens_address:", tokens_address);
+
   let accounts_address =
     process.env.ACCOUNTS_ADDRESS ||
     (await deploy_contract("Accounts", [contracts_address]));
@@ -78,6 +83,7 @@ async function deploy_contracts() {
   const contracts = await Contracts.attach(contracts_address);
 
   contracts.set_rate_control(rate_control_address);
+  contracts.set_tokens(tokens_address);
   contracts.set_accounts(accounts_address);
   contracts.set_spaces(spaces_address);
   contracts.set_posts(posts_address);
@@ -92,6 +98,7 @@ async function deploy_contracts() {
 
     contracts_address,
     rate_control_address,
+    tokens_address,
     accounts_address,
     spaces_address,
     posts_address,

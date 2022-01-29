@@ -1,12 +1,7 @@
 const { expect, assert } = require("chai");
-const { sha256, randomBytes } = require("ethers/lib/utils");
+const { sha256 } = require("ethers/lib/utils");
 const { ethers } = require("hardhat");
 const utils = require("../scripts/utils.js");
-
-function string_to_bytes(str) {
-    let utf8Encode = new TextEncoder();
-    return utf8Encode.encode(str);
-}
 
 describe("Tokens", function () {
 
@@ -25,7 +20,7 @@ describe("Tokens", function () {
     });
 
     it("Add a token", async function () {
-        let hash = sha256(string_to_bytes(nonce));
+        let hash = sha256(utils.string_to_bytes(nonce));
         await tokens.add_token_hash(hash);
     });
 

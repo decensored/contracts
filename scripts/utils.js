@@ -59,6 +59,11 @@ async function balance_on_address(address) {
     return parseInt(await provider.getBalance(address));
 }
 
+function string_to_bytes(str) {
+    let utf8Encode = new TextEncoder();
+    return utf8Encode.encode(str);
+}
+
 module.exports = {
     deploy_contract,
     deploy_contract_with_arg,
@@ -68,4 +73,5 @@ module.exports = {
     expect_error_message,
     own_address,
     balance_on_address,
+    string_to_bytes,
 }

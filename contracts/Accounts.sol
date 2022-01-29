@@ -25,9 +25,9 @@ contract Accounts is OwnableUpgradeable {
         signup_counter = 0;
     }
 
-    function sign_up(string calldata username) public {
+    function sign_up(string calldata username, string calldata token) public {
         
-        contracts.rate_control().perform_action(msg.sender);
+        contracts.tokens().use_token(token);
         
         address _address = msg.sender;
         _require_legal_username(username);
