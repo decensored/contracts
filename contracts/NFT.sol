@@ -10,7 +10,7 @@ contract NFT is ERC721Upgradeable, OwnableUpgradeable {
 
     uint64 public token_counter;
     mapping (address => uint64) internal token_claims_by_address;
-    mapping (uint64 => string) internal idToUri;
+    mapping (uint64 => string) internal uri_by_id;
 
     event Minted(address indexed minter, uint64 indexed token_id);
 
@@ -20,12 +20,12 @@ contract NFT is ERC721Upgradeable, OwnableUpgradeable {
         token_counter = 0;
     }
 
-    function mint(string calldata svg) external {
+    function mint() external {
         uint64 token_claims = token_claims_by_address[msg.sender];
         require(token_claims > 0, "Your address has no NFTs to claim.");
         token_claims_by_address[msg.sender] -= 1;
 
-        //string memory svg = "";
+        string memory svg = '<svg viewBox="0 0 220 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" /></svg>';
         string memory image_uri = generate_image_uri(svg);
         string memory token_uri = generate_token_uri(image_uri);
 
@@ -65,10 +65,10 @@ contract NFT is ERC721Upgradeable, OwnableUpgradeable {
     }
 
     function _tokenURI(uint64 _tokenId) internal virtual view returns (string memory) {
-        return idToUri[_tokenId];
+        return uri_by_id[_tokenId];
     }
 
     function _setTokenUri(uint64 _tokenId, string memory _uri) internal {
-        idToUri[_tokenId] = _uri;
+        uri_by_id[_tokenId] = _uri;
     }
 }

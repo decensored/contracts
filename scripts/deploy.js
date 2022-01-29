@@ -84,12 +84,22 @@ async function deploy_contracts() {
   };
 }
 
-deploy_contracts().then((result) => {
-  const fs = require("fs");
-  const filename = "deployment.json";
-  const json = JSON.stringify(result, null, 2);
-  fs.writeFileSync(filename, json);
-  console.log("wrote              :", filename);
+async function deploy_NFT_contract() {
+    deploy_contract("NFT").then((result) => {
+        console.log(result);
+    });
+}
 
-  console.log(json);
-});
+async function deploy_decensored_contracts() {
+    deploy_contracts().then((result) => {
+        const fs = require("fs");
+        const filename = "deployment.json";
+        const json = JSON.stringify(result, null, 2);
+        fs.writeFileSync(filename, json);
+        console.log("wrote              :", filename);
+    
+        console.log(json);
+    });
+}
+
+deploy_decensored_contracts();
