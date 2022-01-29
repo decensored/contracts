@@ -36,8 +36,18 @@ contract Spaces is OwnableUpgradeable {
 
     function _create(string calldata name, uint64 owner) internal {
         uint64 id = ++id_counter;
-        spaces[id] = Space(id, owner, name);
+        spaces[id] = Space(id, owner, name, "");
         id_by_name[name] = id;
+    }
+
+    function set_description(uint64 space_id, string calldata description) public {
+        uint64 account_sender = contracts.accounts().id_by_address(msg.sender);
+        uint64 space_owner = spaces[space_id].owner;
+        require(account_sender == space_owner, "cannot change description of space: you do not own the space");
+        
+        Space memory space = spaces[space_id];
+        space.description = description;
+        spaces[space_id] = space;
     }
 
     function add_account_to_blacklist(uint64 space, uint64 account) public {
@@ -97,4 +107,5 @@ struct Space {
     uint64 id;
     uint64 owner;
     string name;
+    string description;
 }

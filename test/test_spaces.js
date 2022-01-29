@@ -35,6 +35,14 @@ describe("Spaces", function () {
         await spaces.create(space1_name);
     });
 
+    it("Set Space Description", async function () {
+        let description = "a space";
+        let space_id = await spaces.id_by_name(space1_name);
+        await spaces.set_description(space_id, description);
+        let space = await spaces.spaces(space_id);
+        expect(space[3]).to.equal(description);
+    });
+
     it("Fail creating space with existing name", async function () {
         await utils.expect_error_message(async () => {
             await spaces.create(space1_name);
