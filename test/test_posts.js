@@ -78,7 +78,7 @@ describe("Posts", function () {
     it("Post on blockchain should equal post submitted", async function () {
         const [ret_message, ret_author, _, __] = await posts.posts(1);
         expect(ret_message).to.equal(message);
-        let author_address = await accounts.address_by_id(ret_author);
+        let [_1, _2, _3, author_address] = await accounts.accounts(ret_author);
         expect(author_address).to.equal(await utils.own_address());
     });
 

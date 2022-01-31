@@ -10,9 +10,7 @@ contract Accounts is OwnableUpgradeable {
     Contracts public contracts;
 
     uint64 signup_counter;
-    mapping(uint64 => address) public address_by_id;
-    mapping(uint64 => string) public username_by_id;
-    mapping(uint64 => string) public public_key_by_id;
+    mapping(uint64 => Account) public accounts;
     mapping(address => uint64) public id_by_address;
     mapping(string => uint64) public id_by_username;
 
@@ -41,8 +39,7 @@ contract Accounts is OwnableUpgradeable {
         uint64 id = ++signup_counter;
         string memory username_lower = _string_to_lower(username);
 
-        address_by_id[id] = _address;
-        username_by_id[id] = username;
+        accounts[id] = Account(username, "", "", _address);
         id_by_address[_address] = id;
         id_by_username[username_lower] = id;
 
@@ -55,8 +52,24 @@ contract Accounts is OwnableUpgradeable {
         require(length == 128, "Cannot set public key: invalid length");
 
         contracts.rate_control().perform_action(msg.sender);
-        uint64 account = id_by_address[msg.sender];
-        public_key_by_id[account] = public_key;
+
+        uint64 id = id_by_address[msg.sender];
+        Account memory account = accounts[id];
+        account.public_key = public_key;
+        accounts[id] = account;
+    }
+
+    function set_profile_picture(string calldata profile_picture) public {
+
+        uint256 length = bytes(profile_picture).length;
+        require(length > 256, "Cannot set profile picture: path too long");
+
+        contracts.rate_control().perform_action(msg.sender);
+        
+        uint64 id = id_by_address[msg.sender];
+        Account memory account = accounts[id];
+        account.profile_picture = profile_picture;
+        accounts[id] = account;
     }
 
     function _require_legal_username(string calldata username) private pure {
@@ -97,4 +110,11 @@ contract Accounts is OwnableUpgradeable {
         }
         return string(bytes_output);
     }
+}
+
+struct Account {
+    string username;
+    string public_key;
+    string profile_picture;
+    address _address;
 }

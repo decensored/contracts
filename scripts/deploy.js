@@ -91,7 +91,7 @@ async function deploy_contracts() {
   return {
     deeplink: `${process.env.FRONTEND_DOMAIN}?evmNode=${encodeURIComponent(
       network.url
-    )}&contractPostsAddress=${encodeURIComponent(posts_address)}`,
+    )}&contractContractsAddress=${encodeURIComponent(contracts_address)}`,
     evmNode: network.url,
     // chainId: network.chainId,
 
