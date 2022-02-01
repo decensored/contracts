@@ -11,19 +11,19 @@ describe("RateControl", function () {
     });
 
     it("Addresses cannot perform actions by default", async function () {
-        utils.expect_error_message(async () => {
+        await utils.expect_error_message(async () => {
             await rate_control.perform_action(utils.own_address());
         }, "you already reached your rate limit");
     });
 
     it("Address can perform actions after rate control increased", async function () {
-        await rate_control.set_rate_limit(utils.own_address(), 2);
+        await rate_control.set_rate(utils.own_address(), 2);
         await rate_control.perform_action(utils.own_address());
         await rate_control.perform_action(utils.own_address());
     });
 
     it("Address cannot perform actions beyond rate limit", async function () {
-        utils.expect_error_message(async () => {
+        await utils.expect_error_message(async () => {
             await rate_control.perform_action(utils.own_address());
         }, "you already reached your rate limit");
     });
@@ -32,7 +32,7 @@ describe("RateControl", function () {
         await network.provider.send("evm_increaseTime", [20*60])
         await rate_control.perform_action(utils.own_address());
         await rate_control.perform_action(utils.own_address());
-        utils.expect_error_message(async () => {
+        await  utils.expect_error_message(async () => {
             await rate_control.perform_action(utils.own_address());
         }, "you already reached your rate limit");
     });
@@ -45,21 +45,35 @@ describe("RateControl", function () {
         let rate_control_as_signer0 = await rate_control.connect(signer0);
         let rate_control_as_signer1 = await rate_control.connect(signer1);
 
-        utils.expect_error_message(async () => {
+        await utils.expect_error_message(async () => {
             await rate_control_as_signer1.perform_action(signer1.address);
         }, "you already reached your rate limit");
         await rate_control_as_signer0.perform_action(signer0.address);
         await rate_control_as_signer0.perform_action(signer0.address);
 
-        await rate_control.set_rate_limit(signer1.address, 2);
+        await rate_control.set_rate(signer1.address, 2);
 
         await rate_control_as_signer1.perform_action(signer1.address);
         await rate_control_as_signer1.perform_action(signer1.address);
-        utils.expect_error_message(async () => {
+        await utils.expect_error_message(async () => {
             await rate_control_as_signer1.perform_action(signer1.address);
         }, "you already reached your rate limit");
-        utils.expect_error_message(async () => {
+        await utils.expect_error_message(async () => {
             await rate_control_as_signer0.perform_action(signer0.address);
+        }, "you already reached your rate limit");
+    });
+
+    it("Rate control can be set to default rate", async function () {
+        await network.provider.send("evm_increaseTime", [20*60])
+        await rate_control.set_rate(utils.own_address(), 0);
+        let default_rate = 3;
+        await rate_control.set_default_rate(default_rate);
+
+        for(let i = 0; i < default_rate; i++) {
+            await rate_control.perform_action(utils.own_address());
+        }
+        await  utils.expect_error_message(async () => {
+            await rate_control.perform_action(utils.own_address());
         }, "you already reached your rate limit");
     });
 

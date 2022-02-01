@@ -31,7 +31,7 @@ describe("Spaces", function () {
     });
 
     it("Create Space", async function () {
-        await rate_control.set_rate_limit(await utils.own_address(), 10);
+        await rate_control.set_rate(await utils.own_address(), 10);
         await spaces.create(space1_name);
     });
 

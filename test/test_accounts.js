@@ -25,7 +25,7 @@ describe("Accounts", function () {
         }
 
         rate_control = await utils.deploy_proxy("RateControl");
-        await rate_control.set_rate_limit(await utils.own_address(), 10);
+        await rate_control.set_rate(await utils.own_address(), 10);
 
         await contracts.set_rate_control(rate_control.address);
         await contracts.set_tokens(tokens.address);
@@ -63,12 +63,12 @@ describe("Accounts", function () {
 
     it("Should be able to sign up with another address", async function () {
         [addr0, addr1, addr2] = await ethers.getSigners();
-        await rate_control.set_rate_limit(addr1.address, 10);
+        await rate_control.set_rate(addr1.address, 10);
         await accounts.connect(addr1).sign_up("my_alias", nonces.pop());
     });
 
     it("Should not be able to sign up with another address for same username", async function () {
-        await rate_control.set_rate_limit(addr2.address, 10);
+        await rate_control.set_rate(addr2.address, 10);
         await utils.expect_error_message(async () => {
             await accounts.connect(addr2).sign_up("my_alias", nonces.pop());
         }, "cannot sign up: username already in use");

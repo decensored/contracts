@@ -7,6 +7,7 @@
     "generate-abis": "./scripts/generate-abis.sh",
     "deploy": "npm run generate-abis && dotenv npx hardhat run scripts/deploy.js",
     "disableratecontrol": "dotenv npx hardhat run scripts/disableratecontrol.js",
+    "generatetokens": "npx hardhat run scripts/generatetokens.js",
     "deploy-without-ratecontrol": "npm run deploy && npm run disableratecontrol",
     "test": "npx hardhat test"
   },

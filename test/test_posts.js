@@ -23,7 +23,7 @@ describe("Posts", function () {
         spaces = await utils.deploy_proxy("Spaces", [contracts.address]);
         posts = await utils.deploy_proxy("Posts", [contracts.address]);
 
-        await rate_control.set_rate_limit((await utils.own_address()), 10);
+        await rate_control.set_rate((await utils.own_address()), 10);
 
         for(let i = 0; i < 1; i++) {
             let nonce = "nonce#"+i;

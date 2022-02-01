@@ -9,11 +9,11 @@ const deployment = require("../deployment.json"); // from last npm run deploy
 
 async function main() {
   const Contract = await ethers.getContractFactory("RateControl");
-  const contract = await Contract.attach(deployment.ratecontrol_address);
+  const contract = await Contract.attach(deployment.rate_control_address);
 
   //let address = "0x0d26378E0E6552fc236e1a7FD67341444C74ee40";
   //return await contract.is_below_rate_limit(address);
-  //return await contract.set_rate_limit(address, 50);
+  //return await contract.set_rate(address, 50);
 
   await contract.set_rate_control_enabled(false);
   return "ratecontrol disabled";
