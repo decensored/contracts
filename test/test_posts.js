@@ -85,8 +85,8 @@ describe("Posts", function () {
     it("can delete post", async function () {
         let post_index = await posts.get_amount_of_posts();
         await posts.delete_post(post_index);
-        let [message] = await posts.posts(post_index);
-        expect(message).to.equal("[DELETED]");
+        let [_0, _1, _2, _3, _4, deleted] = await posts.posts(post_index);
+        expect(deleted, "Post is not deleted");
     });
 
     it("Should be able to reply to post", async function () {
