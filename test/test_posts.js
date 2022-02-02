@@ -82,6 +82,13 @@ describe("Posts", function () {
         expect(author_address).to.equal(await utils.own_address());
     });
 
+    it("can delete post", async function () {
+        let post_index = await posts.get_amount_of_posts();
+        await posts.delete_post(post_index);
+        let [message] = await posts.posts(post_index);
+        expect(message).to.equal("[DELETED]");
+    });
+
     it("Should be able to reply to post", async function () {
         let message = "This is a reply";
         let mother_post_index = await posts.get_amount_of_posts();

@@ -55,6 +55,14 @@ contract Posts is OwnableUpgradeable {
         replies_by_post[mother_post].push(amount_of_posts);
     }
 
+    function delete_post(uint64 index) public {
+        Post memory post = posts[index];
+        uint64 account_id = contracts.accounts().id_by_address(msg.sender);
+        require(post.author == account_id && account_id > 0, "Cannot delete post: you are not the author.");
+        post.message = "[DELETED]";
+        posts[index] = post;
+    }
+
     function _submit_post(uint64 space, string memory message, uint64 mother_post) internal {
         contracts.rate_control().perform_action(msg.sender);
 
