@@ -26,21 +26,24 @@ contract Spaces is OwnableUpgradeable {
         return id_counter;
     }
 
-    function create(string calldata name) public {
+    function create(string calldata name, string calldata description) public {
         contracts.rate_control().perform_action(msg.sender);
         _require_legal_space_name(name);
         require(id_by_name[name] == 0, "cannot create space: a space with this name already exists");
         uint64 owner = contracts.accounts().id_by_address(msg.sender);
-        _create(name, owner);
+        _create(name, owner, description);
     }
 
-    function _create(string calldata name, uint64 owner) internal {
+    function _create(string calldata name, uint64 owner, string calldata description) internal {
         uint64 id = ++id_counter;
-        spaces[id] = Space(id, owner, name, "");
+        _require_legal_description(description);
+        spaces[id] = Space(id, owner, name, description);
         id_by_name[name] = id;
     }
 
     function set_description(uint64 space_id, string calldata description) public {
+        _require_legal_description(description);
+        
         uint64 account_sender = contracts.accounts().id_by_address(msg.sender);
         uint64 space_owner = spaces[space_id].owner;
         require(account_sender == space_owner, "cannot change description of space: you do not own the space");
@@ -82,6 +85,11 @@ contract Spaces is OwnableUpgradeable {
         require(is_number_within_range(length, 4, 15), "space name must be 4-15 characters long");
         require(_is_string_consisting_of(space_name, legal_characters), "space name contains illegal characters");
     }
+
+    function _require_legal_description(string calldata description) private pure {
+        int length = int(bytes(description).length);
+        require(length < 200, "description must be 200 characters or less");
+      }
 
     function is_number_within_range(int number, int min, int max) private pure returns(bool){
         return min < number && number < max;

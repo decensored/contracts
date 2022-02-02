@@ -7,7 +7,7 @@ const utils = require("./utils.js");
 const deployment = require("../deployment.json");
 
 async function main() {
-    utils.upgrade_proxy("Posts", deployment.posts_address);
+    utils.upgrade_proxy("Spaces", deployment.spaces_address);
 }
 
 main().then(console.log);
