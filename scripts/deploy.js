@@ -94,9 +94,9 @@ async function deploy_contracts() {
   const network = hardhatConfig.networks[process.env.HARDHAT_NETWORK];
   const LOCAL_HARDHAT_NODE = 'http://localhost:8545'
   return {
-    deeplink: `${process.env.FRONTEND_DOMAIN}?evmNode=${encodeURIComponent(
+    deeplink: `${process.env.FRONTEND_DOMAIN}/deeplink/customnode/${encodeURIComponent(
       network?.url ?? LOCAL_HARDHAT_NODE
-    )}&contractsAddress=${encodeURIComponent(contracts_address)}`,
+    )}/${encodeURIComponent(contracts_address)}`,
     evmNode: network?.url ?? LOCAL_HARDHAT_NODE,
     // chainId: network.chainId,
 
