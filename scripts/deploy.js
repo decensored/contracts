@@ -87,6 +87,10 @@ async function deploy_contracts() {
   await contracts.set_spaces(spaces_address);
   await contracts.set_posts(posts_address);
 
+  const RateControl = await ethers.getContractFactory("RateControl");
+  const rateControl = await RateControl.attach(rate_control_address);
+  await rateControl.set_default_rate(10);
+
   const network = hardhatConfig.networks[process.env.HARDHAT_NETWORK];
   return {
     deeplink: `${process.env.FRONTEND_DOMAIN}?evmNode=${encodeURIComponent(

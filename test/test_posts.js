@@ -51,7 +51,7 @@ describe("Posts", function () {
 
     it("Submit a post to space", async function () {
         await accounts.sign_up("micro_hash", nonces.pop());
-        await spaces.create("space1");
+        await spaces.create("space1", "");
         await utils.submit_post(posts, 1, message)
     });
 
@@ -80,6 +80,13 @@ describe("Posts", function () {
         expect(ret_message).to.equal(message);
         let [_1, _2, _3, author_address] = await accounts.accounts(ret_author);
         expect(author_address).to.equal(await utils.own_address());
+    });
+
+    it("can delete post", async function () {
+        let post_index = await posts.get_amount_of_posts();
+        await posts.delete_post(post_index);
+        let [_0, _1, _2, _3, _4, deleted] = await posts.posts(post_index);
+        expect(deleted, "Post is not deleted");
     });
 
     it("Should be able to reply to post", async function () {

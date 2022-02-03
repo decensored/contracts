@@ -55,6 +55,15 @@ contract Posts is OwnableUpgradeable {
         replies_by_post[mother_post].push(amount_of_posts);
     }
 
+    function delete_post(uint64 index) public {
+        Post memory post = posts[index];
+        uint64 account_id = contracts.accounts().id_by_address(msg.sender);
+        require(post.author == account_id && account_id > 0, "Cannot delete post: you are not the author.");
+        post.message = "";
+        post.deleted = true;
+        posts[index] = post;
+    }
+
     function _submit_post(uint64 space, string memory message, uint64 mother_post) internal {
         contracts.rate_control().perform_action(msg.sender);
 
@@ -68,7 +77,7 @@ contract Posts is OwnableUpgradeable {
         require(!is_blacklisted, "Cannot submit post: you are on this space's blacklist");
 
         uint64 index = uint64(++amount_of_posts);
-        posts[index] = Post(message, user_id, uint64(block.timestamp), space, mother_post);
+        posts[index] = Post(message, user_id, uint64(block.timestamp), space, mother_post, false);
         posts_by_author[user_id].push(index);
         posts_by_space[space].push(index);
 
@@ -86,4 +95,5 @@ struct Post {
     uint64 timestamp;
     uint64 space;
     uint64 mother_post;
+    bool deleted;
 }
