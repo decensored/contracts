@@ -22,20 +22,21 @@ jobs:
         with:
           node-version: '14'
 
+      # Validate environment
       - name: Show NodeJs version    
         run: |
           node --version
 
-      # Validate environment
       - name: Show NPM version    
         run: |
           npm --version
 
+      # Prepare dependencies
       - name: Install NPM dependencies
         run: |
           npm ci
 
       # Build
-      - name: Compile
+      - name: Run hardhat test
         run: |
           npx hardhat test
