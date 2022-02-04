@@ -5,8 +5,6 @@ on:
       - "**.sol"
       - ".github/workflows/hardhat-test.yml"
 
-env:
-
 
 jobs:
   build:
