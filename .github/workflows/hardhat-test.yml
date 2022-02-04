@@ -6,12 +6,7 @@ on:
       - ".github/workflows/hardhat-test.yml"
 
 env:
-  # Use hardhat default Private key and network
-  # and not the one from GitHub Secrets
-  #PRIVATEKEY: ${{ secrets.PRIVATEKEY }}
-  PRIVATEKEY: '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
-  #HARDHAT_NETWORK: ${{ secrets.HARDHAT_NETWORK }}
-  HARDHAT_NETWORK: 'localhost'
+
 
 jobs:
   build:
