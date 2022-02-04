@@ -1,8 +1,10 @@
 name: hardhat-test
+
 on:
   push:
     paths:
       - "**.sol"
+      - "test/**.js"
       - ".github/workflows/hardhat-test.yml"
 
 env:
@@ -36,7 +38,7 @@ jobs:
         run: |
           npm ci
 
-      # Build
+      # Test
       - name: Run hardhat test
         run: |
           npx hardhat test
