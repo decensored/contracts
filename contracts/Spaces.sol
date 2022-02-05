@@ -77,8 +77,15 @@ contract Spaces is OwnableUpgradeable {
     }
 
     function is_allowed(uint64 space, uint64 account) public view returns(bool) {
-    
+        
+
         Space memory _space = spaces[space];
+
+        // Public space, allow access
+        if(_space.nft_address == 0x0000000000000000000000000000000000000000) {
+            return true;
+        }
+
         ERC721 nft = ERC721(_space.nft_address);
 
         // TODO: Get account address  - msg.sender maybe has no nfts, but a linked account 
