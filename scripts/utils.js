@@ -1,5 +1,6 @@
 const { expect, assert } = require("chai");
 const { ethers, waffle } = require("hardhat");
+const { sha256 } = require("ethers/lib/utils");
 
 const provider = waffle.provider;
 
@@ -64,6 +65,38 @@ function string_to_bytes(str) {
     return utf8Encode.encode(str);
 }
 
+async function deploy_all_contracts(amount_of_nonces) {
+
+    let c = {};
+
+    c.contracts = await deploy_proxy("Contracts");
+    c.rate_control = await deploy_proxy("RateControl");
+    c.tokens = await deploy_proxy("Tokens", []);
+    c.accounts = await deploy_proxy("Accounts", [c.contracts.address]);
+    c.spaces = await deploy_proxy("Spaces", [c.contracts.address]);
+    c.posts = await deploy_proxy("Posts", [c.contracts.address]);
+    c.upvotes = await deploy_proxy("Upvotes", [c.contracts.address]);
+
+    await c.contracts.set_rate_control(c.rate_control.address);
+    await c.contracts.set_accounts(c.accounts.address);
+    await c.contracts.set_spaces(c.spaces.address);
+    await c.contracts.set_posts(c.posts.address);
+    await c.contracts.set_tokens(c.tokens.address);
+    await c.contracts.set_upvotes(c.upvotes.address);
+
+    await c.rate_control.set_rate((await own_address()), 10);
+
+    c.nonces = [];
+    for(let i = 0; i < amount_of_nonces; i++) {
+        let nonce = "nonce#"+i;
+        c.nonces.push(nonce);
+        let hash = sha256(string_to_bytes(nonce));
+        await c.tokens.add_token_hash(hash)
+    }
+
+    return c;
+}
+
 module.exports = {
     deploy_contract,
     deploy_contract_with_arg,
@@ -74,4 +107,5 @@ module.exports = {
     own_address,
     balance_on_address,
     string_to_bytes,
+    deploy_all_contracts,
 }
