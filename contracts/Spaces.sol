@@ -77,8 +77,6 @@ contract Spaces is OwnableUpgradeable {
     }
 
     function is_allowed(uint64 space, uint64 account) public view returns(bool) {
-        
-
         Space memory _space = spaces[space];
 
         // Public space, allow access
@@ -88,8 +86,13 @@ contract Spaces is OwnableUpgradeable {
 
         ERC721 nft = ERC721(_space.nft_address);
 
-        // TODO: Get account address  - msg.sender maybe has no nfts, but a linked account 
-        uint256 ownerTokenCount = nft.balanceOf(msg.sender);
+        // Get account address  - msg.sender maybe has no nfts, but a linked account 
+        address[] memory addresses = contracts.accounts().get_connected_addresses(account);
+
+        uint256 ownerTokenCount = 0;
+        for (uint256 i; i < addresses.length; i++) {
+            ownerTokenCount += nft.balanceOf(addresses[i]);
+        }
 
         if (ownerTokenCount > 0) {
             return true;

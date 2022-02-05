@@ -38,8 +38,8 @@ contract Accounts is OwnableUpgradeable {
     function _sign_up(address _address, string calldata username) internal {
         uint64 id = ++signup_counter;
         string memory username_lower = _string_to_lower(username);
-
-        accounts[id] = Account(username, "", "", _address);
+        address[] memory arr;
+        accounts[id] = Account(username, "", "", _address, arr);
         id_by_address[_address] = id;
         id_by_username[username_lower] = id;
 
@@ -110,6 +110,18 @@ contract Accounts is OwnableUpgradeable {
         }
         return string(bytes_output);
     }
+
+    // This method gets called by metamask and adds the address to accounts connected_addresses
+    function connect_metamask_address(uint64 account_id) public {
+        Account memory account = accounts[account_id];
+        account.connected_addresses[0] = msg.sender;
+    }
+
+    function get_connected_addresses(uint64 account_id) external view returns (address[] memory) {
+        Account memory account = accounts[account_id];
+        require(account._address == msg.sender, "You dont have permission to do this!");
+        return account.connected_addresses;
+    }
 }
 
 struct Account {
@@ -117,4 +129,5 @@ struct Account {
     string public_key;
     string profile_picture;
     address _address;
+    address[] connected_addresses;
 }
