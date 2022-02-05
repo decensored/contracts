@@ -113,7 +113,8 @@ contract Accounts is OwnableUpgradeable {
 
     // This method gets called by metamask and adds the address to accounts connected_addresses
     function connect_metamask_address(uint64 account_id) public {
-        Account memory account = accounts[account_id];
+        Account storage account = accounts[account_id];
+        require(account._address != msg.sender, "You need to send this message via Metamask");
         account.connected_addresses[0] = msg.sender;
     }
 
