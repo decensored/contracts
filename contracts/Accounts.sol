@@ -115,6 +115,8 @@ contract Accounts is OwnableUpgradeable {
     function connect_metamask_address(uint64 account_id) public {
         Account storage account = accounts[account_id];
         require(account._address != msg.sender, "You need to send this message via Metamask");
+        
+        // TODO: Allow connected_addresses
         account.connected_addresses[0] = msg.sender;
     }
 
