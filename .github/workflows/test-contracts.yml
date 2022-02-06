@@ -1,12 +1,12 @@
 name: test-contracts
 
 on:
-  workflow_dispatch:
   push:
     paths:
       - "**.sol"
       - "test/**.js"
       - ".github/workflows/test-contracts.yml
+  workflow_dispatch:
 
 env:
   # Default hardhat Private Key
