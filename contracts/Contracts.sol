@@ -9,6 +9,7 @@ import "./Tokens.sol";
 import "./Accounts.sol";
 import "./Spaces.sol";
 import "./Posts.sol";
+import "./Upvotes.sol";
 
 contract Contracts is OwnableUpgradeable {
 
@@ -17,6 +18,7 @@ contract Contracts is OwnableUpgradeable {
     Tokens public tokens;
     Spaces public spaces;
     Posts public posts;
+    Upvotes public upvotes;
 
     function initialize() public initializer  {
         __Context_init_unchained();
@@ -41,5 +43,9 @@ contract Contracts is OwnableUpgradeable {
 
     function set_posts(address address_posts) public onlyOwner {
         posts = Posts(address_posts);
+    }
+
+    function set_upvotes(address address_upvotes) public onlyOwner {
+        upvotes = Upvotes(address_upvotes);
     }
 }

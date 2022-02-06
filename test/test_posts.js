@@ -1,42 +1,20 @@
-const { expect, assert } = require("chai");
-const { ethers } = require("hardhat");
-const { sha256 } = require("ethers/lib/utils");
+const { expect } = require("chai");
 const utils = require("../scripts/utils.js");
 
 describe("Posts", function () {
 
-    let rate_control;
+    let c;
+    let posts;
     let accounts;
     let spaces;
-    let posts;
-    let nonces = [];
 
     let message = "Hola, mundo!";
 
     it("Should be able to deploy contract", async function () {
-
-        contracts = await utils.deploy_proxy("Contracts");
-
-        rate_control = await utils.deploy_proxy("RateControl");
-        tokens = await utils.deploy_proxy("Tokens", []);
-        accounts = await utils.deploy_proxy("Accounts", [contracts.address]);
-        spaces = await utils.deploy_proxy("Spaces", [contracts.address]);
-        posts = await utils.deploy_proxy("Posts", [contracts.address]);
-
-        await rate_control.set_rate((await utils.own_address()), 10);
-
-        for(let i = 0; i < 1; i++) {
-            let nonce = "nonce#"+i;
-            nonces.push(nonce);
-            let hash = sha256(utils.string_to_bytes(nonce));
-            await tokens.add_token_hash(hash)
-        }
-
-        await contracts.set_rate_control(rate_control.address);
-        await contracts.set_accounts(accounts.address);
-        await contracts.set_spaces(spaces.address);
-        await contracts.set_posts(posts.address);
-        await contracts.set_tokens(tokens.address);
+        c = await utils.deploy_all_contracts(1);
+        posts = c.posts;
+        accounts = c.accounts;
+        spaces = c.spaces;
     });
 
     it("get_amount_of_posts() should be 0 after deployment", async function () {
@@ -50,7 +28,7 @@ describe("Posts", function () {
     });
 
     it("Submit a post to space", async function () {
-        await accounts.sign_up("micro_hash", nonces.pop());
+        await accounts.sign_up("micro_hash", c.nonces.pop());
         await spaces.create("space1", "");
         await utils.submit_post(posts, 1, message)
     });
