@@ -1,6 +1,7 @@
 name: hardhat-test
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - "**.sol"
