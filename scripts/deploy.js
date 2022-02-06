@@ -79,6 +79,11 @@ async function deploy_contracts() {
     (await deploy_contract("Posts", [contracts_address]));
   console.log("posts_address      :", posts_address);
 
+  let upvotes_address =
+    process.env.UPVOTES_ADDRESS ||
+    (await deploy_contract("Upvotes", [upvotes_address]));
+  console.log("upvotes_address    :", upvotes_address);
+
   const Contracts = await ethers.getContractFactory("Contracts");
   const contracts = await Contracts.attach(contracts_address);
   await contracts.set_rate_control(rate_control_address);
@@ -86,6 +91,7 @@ async function deploy_contracts() {
   await contracts.set_accounts(accounts_address);
   await contracts.set_spaces(spaces_address);
   await contracts.set_posts(posts_address);
+  await contracts.set_upvotes(upvotes_address);
 
   const RateControl = await ethers.getContractFactory("RateControl");
   const rateControl = await RateControl.attach(rate_control_address);
@@ -106,6 +112,7 @@ async function deploy_contracts() {
     accounts_address,
     spaces_address,
     posts_address,
+    upvotes_address,
   };
 }
 

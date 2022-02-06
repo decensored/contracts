@@ -38,6 +38,7 @@ contract RateControl is OwnableUpgradeable {
     }
 
     function perform_action(address _address) public {
+        // TODO require msg.sender == one of the contracts
         require(is_below_rate_limit(_address), "you already reached your rate limit");
         prune_old_actions(_address);
         action_timestamps_by_address[_address].push(uint64(block.timestamp));

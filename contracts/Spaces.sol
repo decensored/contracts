@@ -75,7 +75,7 @@ contract Spaces is OwnableUpgradeable {
         return blacklist[space_account_id];
     }
 
-    function _encode_two_uint64_as_uint128(uint64 a, uint64 b) public pure returns(uint128) {
+    function _encode_two_uint64_as_uint128(uint64 a, uint64 b) private pure returns(uint128) {
         return uint128(a) * uint128(2**64-1) + uint128(b);
     }
 
