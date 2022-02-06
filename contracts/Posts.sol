@@ -75,7 +75,7 @@ contract Posts is OwnableUpgradeable {
 
 
         bool isAllowedToPost = contracts.spaces().is_allowed(space, user_id);
-        require(!isAllowedToPost, "Cannot submit post: you don't have the rights to post in this space!");
+        require(isAllowedToPost, "Cannot submit post: you don't have the rights to post in this space!");
 
         bool is_blacklisted = contracts.spaces().is_blacklisted(space, user_id);
         require(!is_blacklisted, "Cannot submit post: you are on this space's blacklist");
