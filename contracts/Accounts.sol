@@ -9,7 +9,7 @@ contract Accounts is OwnableUpgradeable {
 
     Contracts public contracts;
 
-    uint64 signup_counter;
+    uint64 public amount_of_accounts;
     mapping(uint64 => Account) public accounts;
     mapping(address => uint64) public id_by_address;
     mapping(string => uint64) public id_by_username;
@@ -20,33 +20,40 @@ contract Accounts is OwnableUpgradeable {
         __Context_init_unchained();
         __Ownable_init_unchained();
         contracts = Contracts(contracts_address);
-        signup_counter = 0;
+        amount_of_accounts = 0;
     }
 
-    function sign_up(string calldata username, string calldata token) public {
-        
+    function sign_up(string memory username, string memory token) public {
         contracts.tokens().use_token(token);
-        
-        address _address = msg.sender;
         _require_legal_username(username);
-        require(id_by_address[_address] == 0, "cannot sign up: address already signed up");
+        require(id_by_address[msg.sender] == 0, "cannot sign up: address already signed up");
         require(id_by_username[_string_to_lower(username)] == 0, "cannot sign up: username already in use");
-
-        _sign_up(_address, username);
+        _sign_up(msg.sender, username);
     }
 
-    function _sign_up(address _address, string calldata username) internal {
-        uint64 id = ++signup_counter;
+    function _sign_up(address _address, string memory username) internal {
+        uint64 id = ++amount_of_accounts;
         string memory username_lower = _string_to_lower(username);
-
         accounts[id] = Account(username, "", "", _address);
         id_by_address[_address] = id;
         id_by_username[username_lower] = id;
-
         emit SignUp(id, _address, username);
     }
 
-    function set_public_key(string calldata public_key) public {
+    function migrate(address from_contract_address, uint64 id_from, uint64 id_to) public onlyOwner {
+        require(amount_of_accounts+1 == id_from, "cannot migrate: id_from != amount_of_accounts+1");
+        Accounts from_contract = Accounts(from_contract_address);
+        for(uint64 id = id_from; id <= id_to; id++) {
+            (string memory username, , , address _address) = from_contract.accounts(id);
+            if(bytes(username).length == 0) {
+                break;
+            }
+            console.log("migrating account #%s (@%s)", id, username);
+            _sign_up(_address, username);
+        }
+    }
+
+    function set_public_key(string memory public_key) public {
 
         uint256 length = bytes(public_key).length;
         require(length == 128, "Cannot set public key: invalid length");
@@ -59,7 +66,7 @@ contract Accounts is OwnableUpgradeable {
         accounts[id] = account;
     }
 
-    function set_profile_picture(string calldata profile_picture) public {
+    function set_profile_picture(string memory profile_picture) public {
 
         uint256 length = bytes(profile_picture).length;
         require(length > 256, "Cannot set profile picture: path too long");
@@ -72,7 +79,7 @@ contract Accounts is OwnableUpgradeable {
         accounts[id] = account;
     }
 
-    function _require_legal_username(string calldata username) private pure {
+    function _require_legal_username(string memory username) private pure {
         int length = int(bytes(username).length);
         string memory legal_characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIKLMNOPQRSTUVWXYZ0123456789_";
         require(_is_number_within_range(length, 4, 15), "username must be 4-15 characters long");

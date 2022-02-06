@@ -52,6 +52,7 @@ module.exports = {
       url: "https://hh.addiota.com",
       accounts: [process.env.PRIVATEKEY],
       gasprice: 0,
+      timeout: 60000,
     },
     "iota-evm.wasp.sc.iota.org": {
       url: "https://evm.wasp.sc.iota.org",

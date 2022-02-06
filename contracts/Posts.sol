@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "hardhat/console.sol";
 import "./Contracts.sol";
+import "./Old_Posts.sol";
 
 
 contract Posts is OwnableUpgradeable {
@@ -76,16 +77,33 @@ contract Posts is OwnableUpgradeable {
         bool is_blacklisted = contracts.spaces().is_blacklisted(space, user_id);
         require(!is_blacklisted, "Cannot submit post: you are on this space's blacklist");
 
-        uint64 index = uint64(++amount_of_posts);
-        posts[index] = Post(message, user_id, uint64(block.timestamp), space, mother_post, false);
-        posts_by_author[user_id].push(index);
-        posts_by_space[space].push(index);
+        _add_post(space, user_id, uint64(block.timestamp), message, mother_post);
 
         emit PostSubmitted(user_id, message);
     }
 
+    function _add_post(uint64 space, uint64 author, uint64 timestamp, string memory message, uint64 mother_post) internal {
+        uint64 index = uint64(++amount_of_posts);
+        posts[index] = Post(message, author, timestamp, space, mother_post, false);
+        posts_by_author[author].push(index);
+        posts_by_space[space].push(index);
+    }
+
     function get_nth_post_index_by_author(uint64 author, uint64 n) public view returns(uint64) {
         return posts_by_author[author][n];
+    }
+
+    function migrate(address from_contract_address, uint64 id_from, uint64 id_to) public onlyOwner {
+        require(amount_of_posts+1 == id_from, "cannot migrate: id_from != amount_of_posts+1");
+        Old_Posts from_contract = Old_Posts(from_contract_address);
+        for(uint64 id = id_from; id <= id_to; id++) {
+            (string memory message, uint64 author, uint64 timestamp, uint64 space, uint64 mother_post) = from_contract.posts(id);
+            if(author == 0) {
+                break;
+            }
+            console.log("migrating post #%s", id);
+            _add_post(space, author, timestamp, message, mother_post);
+        }
     }
 }
 

@@ -81,7 +81,7 @@ async function deploy_contracts() {
 
   let upvotes_address =
     process.env.UPVOTES_ADDRESS ||
-    (await deploy_contract("Upvotes", [upvotes_address]));
+    (await deploy_contract("Upvotes", [contracts_address]));
   console.log("upvotes_address    :", upvotes_address);
 
   const Contracts = await ethers.getContractFactory("Contracts");
@@ -97,11 +97,13 @@ async function deploy_contracts() {
   const rateControl = await RateControl.attach(rate_control_address);
   await rateControl.set_default_rate(10);
 
+
   const network = hardhatConfig.networks[process.env.HARDHAT_NETWORK];
   return {
-    deeplink: `${process.env.FRONTEND_DOMAIN}?evmNode=${encodeURIComponent(
+      // http://localhost:3000/deeplink/customnode/<evmNode>/<contractsAddress> 
+    deeplink: `${process.env.FRONTEND_DOMAIN}/deeplink/customnode/${encodeURIComponent(
       network.url
-    )}&contractsAddress=${encodeURIComponent(contracts_address)}`,
+    )}/${encodeURIComponent(contracts_address)}`,
     evmNode: network.url,
     // chainId: network.chainId,
 

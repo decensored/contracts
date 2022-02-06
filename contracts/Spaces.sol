@@ -9,7 +9,7 @@ contract Spaces is OwnableUpgradeable {
 
     Contracts public contracts;
 
-    uint64 id_counter;
+    uint64 amount_of_spaces;
 
     mapping(uint64 => Space) public spaces;
     mapping(string => uint64) public id_by_name;
@@ -19,14 +19,14 @@ contract Spaces is OwnableUpgradeable {
         __Context_init_unchained();
         __Ownable_init_unchained();
         contracts = Contracts(contracts_address);
-        id_counter = 0;
+        amount_of_spaces = 0;
     }
 
-    function get_latest_space_index() public view returns (uint64) {
-        return id_counter;
+    function get_amount_of_spaces() public view returns (uint64) {
+        return amount_of_spaces;
     }
 
-    function create(string calldata name, string calldata description) public {
+    function create(string memory name, string memory description) public {
         contracts.rate_control().perform_action(msg.sender);
         _require_legal_space_name(name);
         require(id_by_name[name] == 0, "cannot create space: a space with this name already exists");
@@ -34,14 +34,14 @@ contract Spaces is OwnableUpgradeable {
         _create(name, owner, description);
     }
 
-    function _create(string calldata name, uint64 owner, string calldata description) internal {
-        uint64 id = ++id_counter;
+    function _create(string memory name, uint64 owner, string memory description) internal {
+        uint64 id = ++amount_of_spaces;
         _require_legal_description(description);
         spaces[id] = Space(id, owner, name, description);
         id_by_name[name] = id;
     }
 
-    function set_description(uint64 space_id, string calldata description) public {
+    function set_description(uint64 space_id, string memory description) public {
         _require_legal_description(description);
         
         uint64 account_sender = contracts.accounts().id_by_address(msg.sender);
@@ -79,14 +79,14 @@ contract Spaces is OwnableUpgradeable {
         return uint128(a) * uint128(2**64-1) + uint128(b);
     }
 
-    function _require_legal_space_name(string calldata space_name) private pure {
+    function _require_legal_space_name(string memory space_name) private pure {
         int length = int(bytes(space_name).length);
         string memory legal_characters = "abcdefghijklmnopqrstuvwxyz0123456789_";
         require(is_number_within_range(length, 4, 15), "space name must be 4-15 characters long");
         require(_is_string_consisting_of(space_name, legal_characters), "space name contains illegal characters");
     }
 
-    function _require_legal_description(string calldata description) private pure {
+    function _require_legal_description(string memory description) private pure {
         int length = int(bytes(description).length);
         require(length < 200, "description must be 200 characters or less");
       }
@@ -108,6 +108,19 @@ contract Spaces is OwnableUpgradeable {
         if(allowedChars<_bytes.length)
         return false;
         return true;
+    }
+
+    function migrate(address from_contract_address, uint64 id_from, uint64 id_to) public onlyOwner {
+        require(amount_of_spaces+1 == id_from, "cannot migrate: id_from != amount_of_posts+1");
+        Spaces from_contract = Spaces(from_contract_address);
+        for(uint64 id = id_from; id <= id_to; id++) {
+            (, uint64 owner, string memory name, string memory description) = from_contract.spaces(id);
+            if(owner == 0) {
+                break;
+            }
+            console.log("migrating space #%s (%s)", id, name);
+            _create(name, owner, description);
+        }
     }
 }
 
