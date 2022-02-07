@@ -82,7 +82,7 @@ contract Spaces is OwnableUpgradeable {
     function _require_legal_space_name(string memory space_name) private pure {
         int length = int(bytes(space_name).length);
         string memory legal_characters = "abcdefghijklmnopqrstuvwxyz0123456789_";
-        require(is_number_within_range(length, 4, 15), "space name must be 4-15 characters long");
+        require(is_number_within_range(length, 3, 20), "space name must be 3-20 characters long");
         require(_is_string_consisting_of(space_name, legal_characters), "space name contains illegal characters");
     }
 
@@ -92,7 +92,7 @@ contract Spaces is OwnableUpgradeable {
       }
 
     function is_number_within_range(int number, int min, int max) private pure returns(bool){
-        return min < number && number < max;
+        return min <= number && number <= max;
     }
 
     function _is_string_consisting_of(string memory _string, string memory _characters) private pure returns(bool){
