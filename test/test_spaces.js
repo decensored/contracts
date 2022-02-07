@@ -32,7 +32,7 @@ describe("Spaces", function () {
 
     it("Create Space", async function () {
         await rate_control.set_rate(await utils.own_address(), 10);
-        await spaces.create(space1_name, "");
+        await spaces.create(space1_name, "", "0x0000000000000000000000000000000000000000");
     });
 
     it("Set Space Description", async function () {
@@ -45,12 +45,12 @@ describe("Spaces", function () {
 
     it("Fail creating space with existing name", async function () {
         await utils.expect_error_message(async () => {
-            await spaces.create(space1_name, "");
+            await spaces.create(space1_name, "", "0x0000000000000000000000000000000000000000");
         }, "cannot create space: a space with this name already exists");
     });
 
     it("Create Space with other name", async function () {
-        await spaces.create(space2_name, "");
+        await spaces.create(space2_name, "", "0x0000000000000000000000000000000000000000");
     });
 
     it("Spaces have expected IDs", async function () {

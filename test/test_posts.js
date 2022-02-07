@@ -51,7 +51,7 @@ describe("Posts", function () {
 
     it("Submit a post to space", async function () {
         await accounts.sign_up("micro_hash", nonces.pop());
-        await spaces.create("space1", "");
+        await spaces.create("space1", "", "0x0000000000000000000000000000000000000000");
         await utils.submit_post(posts, 1, message)
     });
 
