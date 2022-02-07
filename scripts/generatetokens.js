@@ -22,7 +22,7 @@ async function main() {
   const contract = await Contract.attach(deployment.tokens_address);
 
     for(let i = 0; i < 50; i++) {
-        let nonce = generate_random_string(8);
+        let nonce = generate_random_string(14);
         let hash = sha256(utils.string_to_bytes(nonce));
         await contract.add_token_hash(hash);
         console.log("generated signup token: '"+nonce+"'");
