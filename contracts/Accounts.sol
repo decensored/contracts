@@ -38,8 +38,8 @@ contract Accounts is OwnableUpgradeable {
     function _sign_up(address _address, string calldata username) internal {
         uint64 id = ++signup_counter;
         string memory username_lower = _string_to_lower(username);
-        address[] memory arr;
-        accounts[id] = Account(username, "", "", _address, arr);
+        address[] memory empty_arr;
+        accounts[id] = Account(username, "", "", _address, empty_arr, empty_arr);
         id_by_address[_address] = id;
         id_by_username[username_lower] = id;
 
@@ -111,18 +111,33 @@ contract Accounts is OwnableUpgradeable {
         return string(bytes_output);
     }
 
+    // This method adds and external wallet (metamask) address to an temporary array
+    // The address needs to be veryfied by the metamask owner with the "validateExternAddress" function
+    function addExternAddress(address metamask_address) public {
+        require(metamask_address != msg.sender, "You need to send this message via decensored account");
+
+        // add address to decensored account
+        uint64 id = id_by_address[msg.sender];
+        Account storage account = accounts[id];
+         // TODO: Allow multiple unconnected_addresses
+        account.unconnected_addresses[0] = msg.sender;
+    }
+
     // This method gets called by metamask and adds the address to accounts connected_addresses
-    function connect_metamask_address(uint64 account_id) public {
+    function validateExternAddress(uint64 account_id) public {
         Account storage account = accounts[account_id];
         require(account._address != msg.sender, "You need to send this message via Metamask");
-        
-        // TODO: Allow connected_addresses
-        account.connected_addresses[0] = msg.sender;
+
+        for (uint256 i = 0; i < account.unconnected_addresses.length; i++) {
+            if(account.unconnected_addresses[i] == msg.sender) {
+                // TODO: Allow multiple connected_addresses
+                account.connected_addresses[i] = msg.sender;
+            }
+        }
     }
 
     function get_connected_addresses(uint64 account_id) external view returns (address[] memory) {
         Account memory account = accounts[account_id];
-        require(account._address == msg.sender, "You dont have permission to do this!");
         return account.connected_addresses;
     }
 }
@@ -133,4 +148,5 @@ struct Account {
     string profile_picture;
     address _address;
     address[] connected_addresses;
+    address[] unconnected_addresses;
 }
