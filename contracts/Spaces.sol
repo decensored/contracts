@@ -76,7 +76,7 @@ contract Spaces is OwnableUpgradeable {
         return blacklist[space_account_id];
     }
 
-    function is_allowed(uint64 space, uint64 account) public view returns(bool) {
+    function is_allowed(uint64 space, uint64 account, address sender) public view returns(bool) {
         Space memory _space = spaces[space];
 
         // Public space, allow access
@@ -93,6 +93,10 @@ contract Spaces is OwnableUpgradeable {
         for (uint256 i; i < addresses.length; i++) {
             ownerTokenCount += nft.balanceOf(addresses[i]);
         }
+
+        // If user has the NFT on the Decensored account address (this is not recommended!)
+        ownerTokenCount += nft.balanceOf(sender);
+
 
         if (ownerTokenCount > 0) {
             return true;
