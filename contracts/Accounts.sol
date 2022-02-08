@@ -10,6 +10,8 @@ contract Accounts is OwnableUpgradeable {
     Contracts public contracts;
 
     uint64 public amount_of_accounts;
+    mapping(uint64 => address[]) public unconnected_addresses_by_id;
+    mapping(uint64 => address[]) public connected_addresses_by_id;
     mapping(uint64 => Account) public accounts;
     mapping(address => uint64) public id_by_address;
     mapping(string => uint64) public id_by_username;
@@ -116,6 +118,41 @@ contract Accounts is OwnableUpgradeable {
             }
         }
         return string(bytes_output);
+    }
+
+    // This method adds and external wallet (metamask) address to an temporary array
+    // The address needs to be veryfied by the metamask owner with the "validateExternAddress" function
+    function addExternAddress(address metamask_address) public {
+
+        // metamask_address and sender can't be equal!
+        require(metamask_address != msg.sender, "You need to send this message via decensored account");
+
+        // add address to decensored account
+        uint64 id = id_by_address[msg.sender];
+        unconnected_addresses_by_id[id].push(metamask_address);
+    }
+
+    // This method gets called by metamask and adds the address to accounts connected_addresses
+    function validateExternAddress(uint64 account_id) public {
+        Account storage account = accounts[account_id];
+        require(account._address != msg.sender, "You need to send this message via Metamask");
+
+        address[] memory array = unconnected_addresses_by_id[account_id];
+
+        for (uint256 i = 0; i < array.length; i++) {
+            if(array[i] == msg.sender) {
+               connected_addresses_by_id[account_id].push(msg.sender);
+               delete unconnected_addresses_by_id[account_id];
+            }
+        }
+    }
+
+    function get_unconnected_addresses(uint64 account_id) public view returns (address[] memory) {
+        return unconnected_addresses_by_id[account_id];
+    }
+
+    function get_connected_addresses(uint64 account_id) external view returns (address[] memory) {
+        return connected_addresses_by_id[account_id];
     }
 }
 

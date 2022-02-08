@@ -77,6 +77,12 @@ module.exports = {
       accounts: [process.env.PRIVATEKEY],
       timeout: 60000,
     },
+    strangled: {
+      url: "https://evm.iotabot.strangled.net/",
+      chainId: 1076,
+      accounts: [process.env.PRIVATEKEY],
+      timeout: 120000
+    },
   },
   solidity: {
     version: "0.8.4",

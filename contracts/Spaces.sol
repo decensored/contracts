@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "hardhat/console.sol";
 import "./Contracts.sol";
@@ -26,18 +27,18 @@ contract Spaces is OwnableUpgradeable {
         return amount_of_spaces;
     }
 
-    function create(string memory name, string memory description) public {
+    function create(string memory name, string memory description, address nft_address) public {
         contracts.rate_control().perform_action(msg.sender);
         _require_legal_space_name(name);
         require(id_by_name[name] == 0, "cannot create space: a space with this name already exists");
         uint64 owner = contracts.accounts().id_by_address(msg.sender);
-        _create(name, owner, description);
+        _create(name, owner, description, nft_address);
     }
 
-    function _create(string memory name, uint64 owner, string memory description) internal {
+    function _create(string memory name, uint64 owner, string memory description, address nft_address) internal {
         uint64 id = ++amount_of_spaces;
         _require_legal_description(description);
-        spaces[id] = Space(id, owner, name, description);
+        spaces[id] = Space(id, owner, name, description, nft_address);
         id_by_name[name] = id;
     }
 
@@ -73,6 +74,35 @@ contract Spaces is OwnableUpgradeable {
     function is_blacklisted(uint64 space, uint64 account) public view returns(bool) {
         uint128 space_account_id = _encode_two_uint64_as_uint128(space, account);
         return blacklist[space_account_id];
+    }
+
+    function is_allowed(uint64 space, uint64 account, address sender) public view returns(bool) {
+        Space memory _space = spaces[space];
+
+        // Public space, allow access
+        if(_space.nft_address == 0x0000000000000000000000000000000000000000) {
+            return true;
+        }
+
+        ERC721 nft = ERC721(_space.nft_address);
+
+        // Get account address  - msg.sender maybe has no nfts, but a linked account 
+        address[] memory addresses = contracts.accounts().get_connected_addresses(account);
+
+        uint256 ownerTokenCount = 0;
+        for (uint256 i; i < addresses.length; i++) {
+            ownerTokenCount += nft.balanceOf(addresses[i]);
+        }
+
+        // If user has the NFT on the Decensored account address (this is not recommended!)
+        ownerTokenCount += nft.balanceOf(sender);
+
+
+        if (ownerTokenCount > 0) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     function _encode_two_uint64_as_uint128(uint64 a, uint64 b) private pure returns(uint128) {
@@ -114,12 +144,12 @@ contract Spaces is OwnableUpgradeable {
         require(amount_of_spaces+1 == id_from, "cannot migrate: id_from != amount_of_posts+1");
         Spaces from_contract = Spaces(from_contract_address);
         for(uint64 id = id_from; id <= id_to; id++) {
-            (, uint64 owner, string memory name, string memory description) = from_contract.spaces(id);
+            (, uint64 owner, string memory name, string memory description, ) = from_contract.spaces(id);
             if(owner == 0) {
                 break;
             }
             console.log("migrating space #%s (%s)", id, name);
-            _create(name, owner, description);
+            _create(name, owner, description, address(0));
         }
     }
 }
@@ -129,4 +159,5 @@ struct Space {
     uint64 owner;
     string name;
     string description;
+    address nft_address;
 }

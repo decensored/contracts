@@ -18,7 +18,7 @@ describe("Upvotes", function () {
     });
 
     it("Cannot vote on own posts", async function () {
-        await c.spaces.create("space1", "");
+        await c.spaces.create("space1", "", "0x0000000000000000000000000000000000000000");
         await utils.submit_post(c.posts, 1, "Hello world!")
         await utils.expect_error_message(async () => {
             await c.upvotes.vote(1, 0);
