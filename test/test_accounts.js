@@ -83,16 +83,15 @@ describe("Accounts", function () {
     });
 
     it("Should add metamask address to connected addresses array", async function () {
-        // TODO
-        [addr0, addr1] = await ethers.getSigners();
-        let account_id = (await accounts.id_by_address(addr0.address)).toNumber()
+        [decensored, metamask] = await ethers.getSigners();
+        let account_id = (await accounts.id_by_address(decensored.address)).toNumber()
         
         // Check if unconnected_addresses array is empty
         let my_unconnected_addresses = await accounts.get_unconnected_addresses(account_id)
         expect(my_unconnected_addresses.length).to.equal(0);
         
         // Adds external address
-        await accounts.addExternAddress(addr1.address)
+        await accounts.addExternAddress(metamask.address)
 
         // Check if unconnected_addresses array has one entry
         my_unconnected_addresses = await accounts.get_unconnected_addresses(account_id)
@@ -103,8 +102,8 @@ describe("Accounts", function () {
         const contract = await Contract.attach(accounts.address);
 
         // validate metamask address
-        // use another account (addr1) to sign the tx
-        await contract.connect(addr1).validateExternAddress(account_id)
+        // use another account (metamask) to sign the tx
+        await contract.connect(metamask).validateExternAddress(account_id)
         
         // Check if unconnected_addresses array is empty again
         my_unconnected_addresses = await accounts.get_unconnected_addresses(account_id)
