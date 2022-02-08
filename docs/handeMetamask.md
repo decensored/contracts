@@ -14,3 +14,5 @@ To connect a metamask account, you need to go through the following steps:
 2. Call the `validateExternAddress` function via your metamask account to verify that youre the owner of that metamask account.
 
 That's it! The Decensored account is now connected to the metamask account.
+
+![handleMetamask](./handleMetamask.drawio.svg "handleMetamask")
