@@ -73,4 +73,51 @@ describe("Accounts", function () {
             await accounts.connect(addr2).sign_up("my_alias", nonces.pop());
         }, "cannot sign up: username already in use");
     });
+
+    // External Addresses Tests
+    it("Should not be able to use the same address for external account and decensored account", async function () {
+        [addr0] = await ethers.getSigners();
+        await utils.expect_error_message(async () => {
+            await accounts.addExternAddress(addr0.address)
+        }, "You need to send this message via decensored account");
+    });
+
+    it("Should add metamask address to connected addresses array", async function () {
+        // TODO
+        [addr0, addr1] = await ethers.getSigners();
+        let account_id = (await accounts.id_by_address(addr0.address)).toNumber()
+        
+        // Check if unconnected_addresses array is empty
+        let my_unconnected_addresses = await accounts.get_unconnected_addresses(account_id)
+        expect(my_unconnected_addresses.length).to.equal(0);
+        
+        // Adds external address
+        await accounts.addExternAddress(addr1.address)
+
+        // Check if unconnected_addresses array has one entry
+        my_unconnected_addresses = await accounts.get_unconnected_addresses(account_id)
+        expect(my_unconnected_addresses.length).to.equal(1);
+
+
+        const Contract = await ethers.getContractFactory("Accounts");
+        const contract = await Contract.attach(accounts.address);
+
+        // validate metamask address
+        // use another account (addr1) to sign the tx
+        await contract.connect(addr1).validateExternAddress(account_id)
+        
+        // Check if unconnected_addresses array is empty again
+        my_unconnected_addresses = await accounts.get_unconnected_addresses(account_id)
+        expect(my_unconnected_addresses.length).to.equal(0);
+
+        // Check if connected_addresses  array has one entry
+        let my_connected_addresses = await accounts.get_connected_addresses(account_id)
+        expect(my_connected_addresses.length).to.equal(1);
+
+    });
+
+    it("Should not be able to add an metmask account to more than one account", async function () {
+        // TODO
+    });
+
 });

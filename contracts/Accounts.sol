@@ -10,6 +10,8 @@ contract Accounts is OwnableUpgradeable {
     Contracts public contracts;
 
     uint64 signup_counter;
+    mapping(uint64 => address[]) public unconnected_addresses_by_id;
+    mapping(uint64 => address[]) public connected_addresses_by_id;
     mapping(uint64 => Account) public accounts;
     mapping(address => uint64) public id_by_address;
     mapping(string => uint64) public id_by_username;
@@ -38,8 +40,7 @@ contract Accounts is OwnableUpgradeable {
     function _sign_up(address _address, string calldata username) internal {
         uint64 id = ++signup_counter;
         string memory username_lower = _string_to_lower(username);
-        address[] memory empty_arr;
-        accounts[id] = Account(username, "", "", _address, empty_arr, empty_arr);
+        accounts[id] = Account(username, "", "", _address);
         id_by_address[_address] = id;
         id_by_username[username_lower] = id;
 
@@ -114,13 +115,13 @@ contract Accounts is OwnableUpgradeable {
     // This method adds and external wallet (metamask) address to an temporary array
     // The address needs to be veryfied by the metamask owner with the "validateExternAddress" function
     function addExternAddress(address metamask_address) public {
+
+        // metamask_address and sender can't be equal!
         require(metamask_address != msg.sender, "You need to send this message via decensored account");
 
         // add address to decensored account
         uint64 id = id_by_address[msg.sender];
-        Account storage account = accounts[id];
-         // TODO: Allow multiple unconnected_addresses
-        account.unconnected_addresses[0] = msg.sender;
+        unconnected_addresses_by_id[id].push(metamask_address);
     }
 
     // This method gets called by metamask and adds the address to accounts connected_addresses
@@ -128,17 +129,22 @@ contract Accounts is OwnableUpgradeable {
         Account storage account = accounts[account_id];
         require(account._address != msg.sender, "You need to send this message via Metamask");
 
-        for (uint256 i = 0; i < account.unconnected_addresses.length; i++) {
-            if(account.unconnected_addresses[i] == msg.sender) {
-                // TODO: Allow multiple connected_addresses
-                account.connected_addresses[i] = msg.sender;
+        address[] memory array = unconnected_addresses_by_id[account_id];
+
+        for (uint256 i = 0; i < array.length; i++) {
+            if(array[i] == msg.sender) {
+               connected_addresses_by_id[account_id].push(msg.sender);
+               delete unconnected_addresses_by_id[account_id];
             }
         }
     }
 
+    function get_unconnected_addresses(uint64 account_id) public view returns (address[] memory) {
+        return unconnected_addresses_by_id[account_id];
+    }
+
     function get_connected_addresses(uint64 account_id) external view returns (address[] memory) {
-        Account memory account = accounts[account_id];
-        return account.connected_addresses;
+        return connected_addresses_by_id[account_id];
     }
 }
 
@@ -147,6 +153,4 @@ struct Account {
     string public_key;
     string profile_picture;
     address _address;
-    address[] connected_addresses;
-    address[] unconnected_addresses;
 }
