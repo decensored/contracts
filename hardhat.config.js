@@ -23,7 +23,11 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 module.exports = {
   defaultNetwork: "hardhat",
   networks: {
-    hardhat: {},
+    // HARDHAT_NETWORK=localhost
+    hardhat: { 
+      gasPrice: 0,
+      initialBaseFeePerGas: 0
+    },
     fantom: {
       url: "https://rpc.ftm.tools/",
       accounts: [process.env.PRIVATEKEY],
