@@ -76,6 +76,7 @@ async function deploy_all_contracts(amount_of_nonces) {
     c.spaces = await deploy_proxy("Spaces", [c.contracts.address]);
     c.posts = await deploy_proxy("Posts", [c.contracts.address]);
     c.upvotes = await deploy_proxy("Upvotes", [c.contracts.address]);
+    c.dao = await deploy_proxy("DAO", [c.contracts.address]);
 
     await c.contracts.set_rate_control(c.rate_control.address);
     await c.contracts.set_accounts(c.accounts.address);
@@ -83,6 +84,7 @@ async function deploy_all_contracts(amount_of_nonces) {
     await c.contracts.set_posts(c.posts.address);
     await c.contracts.set_tokens(c.tokens.address);
     await c.contracts.set_upvotes(c.upvotes.address);
+    await c.contracts.set_dao(c.dao.address);
 
     await c.rate_control.set_rate((await own_address()), 10);
 

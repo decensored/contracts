@@ -10,6 +10,7 @@ import "./Accounts.sol";
 import "./Spaces.sol";
 import "./Posts.sol";
 import "./Upvotes.sol";
+import "./DAO.sol";
 
 contract Contracts is OwnableUpgradeable {
 
@@ -19,6 +20,7 @@ contract Contracts is OwnableUpgradeable {
     Spaces public spaces;
     Posts public posts;
     Upvotes public upvotes;
+    DAO public dao;
 
     function initialize() public initializer  {
         __Context_init_unchained();
@@ -47,5 +49,9 @@ contract Contracts is OwnableUpgradeable {
 
     function set_upvotes(address address_upvotes) public onlyOwner {
         upvotes = Upvotes(address_upvotes);
+    }
+
+    function set_dao(address address_dao) public onlyOwner {
+        dao = DAO(address_dao);
     }
 }
