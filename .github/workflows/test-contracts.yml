@@ -1,0 +1,45 @@
+name: test-contracts
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "**.sol"
+      - "test/**.js"
+      - ".github/workflows/test-contracts.yml"
+
+env:
+  # Default hardhat Private Key
+  PRIVATEKEY: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+
+jobs:
+  test-contracts:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Prepare
+      - uses: actions/checkout@v2
+
+      - name: Setup NodeJS 14
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      # Validate environment
+      - name: Show NodeJs version    
+        run: |
+          node --version
+
+      - name: Show NPM version    
+        run: |
+          npm --version
+
+      # Prepare dependencies
+      - name: Install NPM dependencies
+        run: |
+          npm ci
+
+      # Test
+      - name: Run hardhat test
+        run: |
+          npx hardhat test
