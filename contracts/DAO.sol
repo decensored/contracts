@@ -38,9 +38,11 @@ contract DAO is OwnableUpgradeable {
         uint64 account_id = contracts.accounts().id_by_address(msg.sender);
         uint128 proposal_and_account = _encode_two_uint64_as_uint128(proposal_id, account_id);
         int64 weighted_vote = vote_value * int64(voting_weight_by_account[account_id]);
+        contracts.rate_control().perform_action(msg.sender);
+
         Proposal storage proposal = proposals[proposal_id];
         require(proposal.deadline >= uint64(block.timestamp), "cannot vote: voting period has already ended");
-
+        
         int64 weighted_vote_diff = weighted_vote-vote_by_proposal_and_account[proposal_and_account];
         int64 weighted_vote_diff_abs = abs(weighted_vote)-abs(vote_by_proposal_and_account[proposal_and_account]);
         vote_by_proposal_and_account[proposal_and_account] += weighted_vote_diff;

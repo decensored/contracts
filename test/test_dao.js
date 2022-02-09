@@ -2,7 +2,7 @@ const { expect, assert } = require("chai");
 const { ethers } = require("hardhat");
 const utils = require("../scripts/utils.js");
 
-describe.only("DAO", function () {
+describe("DAO", function () {
 
     let c;
     const all_voting_weights = [[1, 10], [2, 5], [3, 7]];
@@ -61,6 +61,15 @@ describe.only("DAO", function () {
         expect(weighted_votes_sum).to.equal(voting_weight1);
         expect(weighted_votes_abs).to.equal(voting_weight1);
         expect(await c.dao.vote_by_proposal_and_account(proposal_and_account)).to.equal(voting_weight1);
+    });
+
+    it("Cannot vote with vote value < -1 or > 1", async function () {
+        await utils.expect_error_message(async () => {
+            await c.dao.vote(1, -2);
+        }, "cannot vote: invalid vote value");
+        await utils.expect_error_message(async () => {
+            await c.dao.vote(1, 2);
+        }, "cannot vote: invalid vote value");
     });
 
     it("Can change vote", async function () {
